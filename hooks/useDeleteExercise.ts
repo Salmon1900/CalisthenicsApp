@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { supabase } from '../utils/supabase';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../utils/queryKeys';
+import { deleteExerciseById } from '../utils/queryFunctions';
 
 interface UseDeleteExerciseReturn {
   deleteExercise: (id: string) => Promise<boolean>;
@@ -8,29 +9,23 @@ interface UseDeleteExerciseReturn {
 }
 
 export function useDeleteExercise(): UseDeleteExerciseReturn {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
+
+  const { mutateAsync, isPending, error } = useMutation({
+    mutationFn: deleteExerciseById,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.exercises.all() });
+    },
+  });
 
   const deleteExercise = async (id: string): Promise<boolean> => {
     try {
-      setLoading(true);
-      setError(null);
-
-      const { error: deleteError } = await supabase
-        .from('exercises')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
-
+      await mutateAsync(id);
       return true;
-    } catch (err) {
-      setError(new Error(err instanceof Error ? err.message : 'Failed to delete exercise'));
+    } catch {
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
-  return { deleteExercise, loading, error };
+  return { deleteExercise, loading: isPending, error: error ?? null };
 }

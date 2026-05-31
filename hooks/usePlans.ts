@@ -1,5 +1,11 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../utils/supabase';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../utils/queryKeys';
+import {
+  deletePlanById,
+  fetchPlans,
+  insertPlan,
+  updatePlanById,
+} from '../utils/queryFunctions';
 import type { WorkoutPlan } from '../utils/supabase';
 
 interface UsePlansReturn {
@@ -13,52 +19,37 @@ interface UsePlansReturn {
 }
 
 export function usePlans(): UsePlansReturn {
-  const [plans, setPlans] = useState<WorkoutPlan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchPlans = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      setError(null);
+  const { data, isPending, error, refetch } = useQuery({
+    queryKey: queryKeys.plans.all(),
+    queryFn: fetchPlans,
+  });
 
-      const { data, error: queryError } = await supabase
-        .from('workout_plans')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const invalidatePlans = () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.plans.all() });
 
-      if (queryError) throw queryError;
-      setPlans(data ?? []);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to fetch plans';
-      setError(new Error(message));
-      console.error('Error fetching plans:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const createMutation = useMutation({
+    mutationFn: ({ name, description }: { name: string; description?: string }) =>
+      insertPlan(name, description),
+    onSuccess: invalidatePlans,
+  });
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
+  const updateMutation = useMutation({
+    mutationFn: ({ id, fields }: { id: string; fields: Partial<Pick<WorkoutPlan, 'name' | 'description'>> }) =>
+      updatePlanById(id, fields),
+    onSuccess: invalidatePlans,
+  });
 
-  const refetch = async (): Promise<void> => {
-    await fetchPlans();
-  };
+  const deleteMutation = useMutation({
+    mutationFn: deletePlanById,
+    onSuccess: invalidatePlans,
+  });
 
   const createPlan = async (name: string, description?: string): Promise<WorkoutPlan | null> => {
     try {
-      const { data, error: insertError } = await supabase
-        .from('workout_plans')
-        .insert({ name, description: description ?? null })
-        .select()
-        .single();
-
-      if (insertError) throw insertError;
-      await fetchPlans();
-      return data;
-    } catch (err) {
-      console.error('Error creating plan:', err);
+      return await createMutation.mutateAsync({ name, description });
+    } catch {
       return null;
     }
   };
@@ -68,35 +59,29 @@ export function usePlans(): UsePlansReturn {
     fields: Partial<Pick<WorkoutPlan, 'name' | 'description'>>,
   ): Promise<boolean> => {
     try {
-      const { error: updateError } = await supabase
-        .from('workout_plans')
-        .update(fields)
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-      await fetchPlans();
+      await updateMutation.mutateAsync({ id, fields });
       return true;
-    } catch (err) {
-      console.error('Error updating plan:', err);
+    } catch {
       return false;
     }
   };
 
   const deletePlan = async (id: string): Promise<boolean> => {
     try {
-      const { error: deleteError } = await supabase
-        .from('workout_plans')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
-      await fetchPlans();
+      await deleteMutation.mutateAsync(id);
       return true;
-    } catch (err) {
-      console.error('Error deleting plan:', err);
+    } catch {
       return false;
     }
   };
 
-  return { plans, loading, error, refetch, createPlan, updatePlan, deletePlan };
+  return {
+    plans: data ?? [],
+    loading: isPending,
+    error: error ?? null,
+    refetch: async () => { await refetch(); },
+    createPlan,
+    updatePlan,
+    deletePlan,
+  };
 }

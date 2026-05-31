@@ -1,8 +1,7 @@
-import { useState } from 'react';
-import { supabase } from '../utils/supabase';
-import type { Exercise } from '../utils/supabase';
-
-type NewExercise = Omit<Exercise, 'id' | 'created_at'>;
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../utils/queryKeys';
+import { insertExercise } from '../utils/queryFunctions';
+import type { NewExercise } from '../utils/queryFunctions';
 
 interface UseAddExerciseReturn {
   addExercise: (exercise: NewExercise) => Promise<boolean>;
@@ -11,31 +10,23 @@ interface UseAddExerciseReturn {
 }
 
 export function useAddExercise(): UseAddExerciseReturn {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
+
+  const { mutateAsync, isPending, error } = useMutation({
+    mutationFn: insertExercise,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.exercises.all() });
+    },
+  });
 
   const addExercise = async (exercise: NewExercise): Promise<boolean> => {
     try {
-      setLoading(true);
-      setError(null);
-
-      const { error: insertError } = await supabase
-        .from('exercises')
-        .insert(exercise);
-
-      if (insertError) {
-        throw insertError;
-      }
-
+      await mutateAsync(exercise);
       return true;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to add exercise';
-      setError(new Error(message));
+    } catch {
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
-  return { addExercise, loading, error };
+  return { addExercise, loading: isPending, error: error ?? null };
 }

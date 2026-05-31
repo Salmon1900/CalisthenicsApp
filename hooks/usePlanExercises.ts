@@ -1,8 +1,14 @@
 import { useState } from 'react';
-import { supabase } from '../utils/supabase';
-import type { Exercise, WorkoutPlanExercise } from '../utils/supabase';
-
-type PlanExerciseWithExercise = WorkoutPlanExercise & { exercise: Exercise };
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../utils/queryKeys';
+import {
+  deletePlanExerciseById,
+  fetchPlanExercises,
+  insertPlanExercise,
+  reorderPlanExercises,
+  updatePlanExerciseQuantity,
+} from '../utils/queryFunctions';
+import type { PlanExerciseWithExercise } from '../utils/queryFunctions';
 
 interface ReorderUpdate {
   id: string;
@@ -21,113 +27,101 @@ interface UsePlanExercisesReturn {
 }
 
 export function usePlanExercises(): UsePlanExercisesReturn {
-  const [planExercises, setPlanExercises] = useState<PlanExerciseWithExercise[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [planId, setPlanId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const refetch = async (planId: string): Promise<void> => {
-    try {
-      setLoading(true);
-      setError(null);
+  const queryKey = planId
+    ? queryKeys.planExercises.byPlan(planId)
+    : (['planExercises', '__none__'] as const);
 
-      const { data, error: queryError } = await supabase
-        .from('workout_plan_exercises')
-        .select('*, exercise:exercises(*)')
-        .eq('workout_plan_id', planId)
-        .order('order_index', { ascending: true });
+  const { data, isFetching, error, refetch: queryRefetch } = useQuery({
+    queryKey,
+    queryFn: () => (planId ? fetchPlanExercises(planId) : Promise.resolve([] as PlanExerciseWithExercise[])),
+    enabled: !!planId,
+    staleTime: 30_000,
+  });
 
-      if (queryError) throw queryError;
-      setPlanExercises((data ?? []) as PlanExerciseWithExercise[]);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to fetch plan exercises';
-      setError(new Error(message));
-      console.error('Error fetching plan exercises:', err);
-    } finally {
-      setLoading(false);
+  const refetch = async (id: string): Promise<void> => {
+    if (id !== planId) {
+      setPlanId(id);
+    } else {
+      await queryRefetch();
     }
   };
 
-  const addExercise = async (
-    planId: string,
-    exerciseId: string,
-    quantity: number,
-  ): Promise<boolean> => {
+  const invalidate = () => {
+    if (planId) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.planExercises.byPlan(planId) });
+    }
+  };
+
+  const addMutation = useMutation({
+    mutationFn: ({ pId, exerciseId, quantity }: { pId: string; exerciseId: string; quantity: number }) => {
+      const cached = queryClient.getQueryData<PlanExerciseWithExercise[]>(
+        queryKeys.planExercises.byPlan(pId),
+      ) ?? [];
+      const maxIndex = cached.length > 0 ? Math.max(...cached.map((pe) => pe.order_index)) : -1;
+      return insertPlanExercise(pId, exerciseId, quantity, maxIndex);
+    },
+    onSuccess: invalidate,
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: deletePlanExerciseById,
+    onSuccess: invalidate,
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: reorderPlanExercises,
+    onSuccess: invalidate,
+  });
+
+  const quantityMutation = useMutation({
+    mutationFn: ({ id, quantity }: { id: string; quantity: number }) =>
+      updatePlanExerciseQuantity(id, quantity),
+    onSuccess: invalidate,
+  });
+
+  const addExercise = async (pId: string, exerciseId: string, quantity: number): Promise<boolean> => {
     try {
-      const maxIndex = planExercises.length > 0
-        ? Math.max(...planExercises.map((pe) => pe.order_index))
-        : -1;
-
-      const { error: insertError } = await supabase
-        .from('workout_plan_exercises')
-        .insert({
-          workout_plan_id: planId,
-          exercise_id: exerciseId,
-          order_index: maxIndex + 1,
-          quantity,
-        });
-
-      if (insertError) throw insertError;
+      await addMutation.mutateAsync({ pId, exerciseId, quantity });
       return true;
-    } catch (err) {
-      console.error('Error adding exercise to plan:', err);
+    } catch {
       return false;
     }
   };
 
   const removeExercise = async (id: string): Promise<boolean> => {
     try {
-      const { error: deleteError } = await supabase
-        .from('workout_plan_exercises')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
+      await removeMutation.mutateAsync(id);
       return true;
-    } catch (err) {
-      console.error('Error removing exercise from plan:', err);
+    } catch {
       return false;
     }
   };
 
   const reorderExercises = async (updates: ReorderUpdate[]): Promise<boolean> => {
     try {
-      const results = await Promise.all(
-        updates.map(({ id, order_index }) =>
-          supabase
-            .from('workout_plan_exercises')
-            .update({ order_index })
-            .eq('id', id),
-        ),
-      );
-
-      const failed = results.find((r) => r.error);
-      if (failed?.error) throw failed.error;
+      await reorderMutation.mutateAsync(updates);
       return true;
-    } catch (err) {
-      console.error('Error reordering exercises:', err);
+    } catch {
       return false;
     }
   };
 
   const updateQuantity = async (id: string, quantity: number): Promise<boolean> => {
     try {
-      const { error: updateError } = await supabase
-        .from('workout_plan_exercises')
-        .update({ quantity })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
+      await quantityMutation.mutateAsync({ id, quantity });
       return true;
-    } catch (err) {
-      console.error('Error updating quantity:', err);
+    } catch {
       return false;
     }
   };
 
   return {
-    planExercises,
-    loading,
-    error,
+    planExercises: data ?? [],
+    loading: isFetching,
+    error: error ?? null,
     refetch,
     addExercise,
     removeExercise,
