@@ -8,39 +8,33 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { theme } from '../../constants/theme';
-import { useAddExercise } from '../../hooks/useAddExercise';
-import type { Exercise } from '../../utils/supabase';
-
-type Difficulty = Exercise['difficulty'];
-type ExerciseType = Exercise['type'];
-
-const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
-const TYPES: { value: ExerciseType; label: string }[] = [
-  { value: 'reps', label: 'Reps' },
-  { value: 'timed', label: 'Timed' },
-];
+import { theme } from '../../../constants/theme';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSave: (name: string, description: string) => Promise<void>;
+  initialName?: string;
+  initialDescription?: string;
+  title?: string;
 }
 
-export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [difficulty, setDifficulty] = useState<Difficulty>('beginner');
-  const [exerciseType, setExerciseType] = useState<ExerciseType>('reps');
+export function CreatePlanModal({
+  visible,
+  onClose,
+  onSave,
+  initialName = '',
+  initialDescription = '',
+  title = 'Create Plan',
+}: Props) {
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
   const [nameError, setNameError] = useState('');
-
-  const { addExercise, loading, error } = useAddExercise();
+  const [loading, setLoading] = useState(false);
 
   const resetForm = () => {
-    setName('');
-    setDescription('');
-    setDifficulty('beginner');
-    setExerciseType('reps');
+    setName(initialName);
+    setDescription(initialDescription);
     setNameError('');
   };
 
@@ -55,17 +49,12 @@ export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
       return;
     }
     setNameError('');
-
-    const success = await addExercise({
-      name: name.trim(),
-      description: description.trim() || null,
-      difficulty,
-      type: exerciseType,
-    });
-
-    if (success) {
+    setLoading(true);
+    try {
+      await onSave(name.trim(), description.trim());
       resetForm();
-      onSuccess();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,14 +62,14 @@ export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleCancel}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          <Text style={styles.title}>Add Exercise</Text>
+          <Text style={styles.title}>{title}</Text>
 
           <Text style={styles.label}>Name</Text>
           <TextInput
             style={[styles.input, nameError ? styles.inputError : null]}
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Pull-up"
+            placeholder="e.g. Push Day"
             placeholderTextColor={theme.colors.muted}
           />
           {nameError ? <Text style={styles.fieldError}>{nameError}</Text> : null}
@@ -90,43 +79,11 @@ export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
             style={[styles.input, styles.inputMultiline]}
             value={description}
             onChangeText={setDescription}
-            placeholder="Describe the exercise…"
+            placeholder="Describe this plan…"
             placeholderTextColor={theme.colors.muted}
             multiline
             numberOfLines={3}
           />
-
-          <Text style={styles.label}>Type</Text>
-          <View style={styles.chipRow}>
-            {TYPES.map((t) => (
-              <Pressable
-                key={t.value}
-                style={[styles.chip, exerciseType === t.value && styles.chipActive]}
-                onPress={() => setExerciseType(t.value)}
-              >
-                <Text style={[styles.chipText, exerciseType === t.value && styles.chipTextActive]}>
-                  {t.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <Text style={styles.label}>Difficulty</Text>
-          <View style={styles.chipRow}>
-            {DIFFICULTIES.map((d) => (
-              <Pressable
-                key={d}
-                style={[styles.chip, difficulty === d && styles.chipActive]}
-                onPress={() => setDifficulty(d)}
-              >
-                <Text style={[styles.chipText, difficulty === d && styles.chipTextActive]}>
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          {error ? <Text style={styles.saveError}>{error.message}</Text> : null}
 
           <View style={styles.actions}>
             <Pressable style={styles.cancelButton} onPress={handleCancel}>
@@ -197,38 +154,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: -10,
     marginBottom: 10,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 20,
-  },
-  chip: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
-  },
-  chipActive: {
-    backgroundColor: theme.colors.accent,
-    borderColor: theme.colors.accent,
-  },
-  chipText: {
-    color: theme.colors.muted,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  chipTextActive: {
-    color: theme.colors.text,
-  },
-  saveError: {
-    color: '#f87171',
-    fontSize: 14,
-    marginBottom: 14,
-    textAlign: 'center',
   },
   actions: {
     flexDirection: 'row',

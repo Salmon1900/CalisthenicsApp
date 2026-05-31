@@ -1,8 +1,9 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { theme } from '../constants/theme';
 import type { RootStackParamList } from '../types/navigation';
+import { useDeleteExercise } from '../hooks/useDeleteExercise';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ExerciseDetail'>;
 
@@ -12,9 +13,28 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   advanced: '#f87171',
 };
 
-export default function ExerciseDetailScreen({ route }: Props) {
+export default function ExerciseDetailScreen({ route, navigation }: Props) {
   const { exercise } = route.params;
   const difficultyColor = DIFFICULTY_COLORS[exercise.difficulty] ?? theme.colors.primary;
+  const { deleteExercise, loading } = useDeleteExercise();
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Exercise',
+      `Are you sure you want to delete "${exercise.name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const success = await deleteExercise(exercise.id);
+            if (success) navigation.navigate('Exercises');
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -33,6 +53,12 @@ export default function ExerciseDetailScreen({ route }: Props) {
             {exercise.description ?? 'No description available.'}
           </Text>
         </View>
+
+        <Pressable style={styles.deleteButton} onPress={handleDelete} disabled={loading}>
+          {loading
+            ? <ActivityIndicator color={theme.colors.text} />
+            : <Text style={styles.deleteText}>Delete Exercise</Text>}
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -84,5 +110,19 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontSize: 16,
     lineHeight: 24,
+  },
+  deleteButton: {
+    marginTop: 32,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    backgroundColor: '#7f1d1d',
+    borderWidth: 1,
+    borderColor: '#f87171',
+  },
+  deleteText: {
+    color: '#f87171',
+    fontWeight: '700',
+    fontSize: 16,
   },
 });

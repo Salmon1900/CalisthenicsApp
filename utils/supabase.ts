@@ -18,7 +18,26 @@ export interface Exercise {
   name: string;
   description: string | null;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
+  type: 'reps' | 'timed';
   created_at: string;
+}
+
+export interface WorkoutPlan {
+  id: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkoutPlanExercise {
+  id: string;
+  workout_plan_id: string;
+  exercise_id: string;
+  order_index: number;
+  quantity: number;
+  created_at: string;
+  exercise?: Exercise;
 }
 
 export interface Database {
@@ -28,6 +47,16 @@ export interface Database {
         Row: Exercise;
         Insert: Omit<Exercise, 'id' | 'created_at'>;
         Update: Partial<Omit<Exercise, 'id' | 'created_at'>>;
+      };
+      workout_plans: {
+        Row: WorkoutPlan;
+        Insert: Omit<WorkoutPlan, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<WorkoutPlan, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      workout_plan_exercises: {
+        Row: WorkoutPlanExercise;
+        Insert: Omit<WorkoutPlanExercise, 'id' | 'created_at' | 'exercise'>;
+        Update: Partial<Omit<WorkoutPlanExercise, 'id' | 'created_at' | 'exercise'>>;
       };
     };
   };

@@ -7,6 +7,8 @@ import HomeScreen from '../screens/HomeScreen';
 import ExercisesScreen from '../screens/ExercisesScreen';
 import ExerciseDetailScreen from '../screens/ExerciseDetailScreen';
 import AdminScreen from '../screens/AdminScreen';
+import PlansScreen from '../screens/PlansScreen';
+import PlanDetailScreen from '../screens/PlanDetailScreen';
 
 enableScreens();
 
@@ -53,6 +55,16 @@ export function AppNavigator() {
           name="Admin"
           component={AdminScreen}
           options={{ title: 'Admin' }}
+        />
+        <Stack.Screen
+          name="Plans"
+          component={PlansScreen}
+          options={{ title: 'Workout Plans' }}
+        />
+        <Stack.Screen
+          name="PlanDetail"
+          component={PlanDetailScreen}
+          options={{ title: 'Plan' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
