@@ -1,0 +1,1 @@
+- [Schema State](schema-state.md) — current tables, columns, indexes, RLS policies, and migration history for the CalisthenicsApp Supabase project
