@@ -7,4 +7,5 @@ export type RootStackParamList = {
   Admin: undefined;
   Plans: undefined;
   PlanDetail: { plan: WorkoutPlan };
+  Workout: { plan: WorkoutPlan };
 };

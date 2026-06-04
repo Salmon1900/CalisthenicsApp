@@ -127,6 +127,15 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
         />
       )}
 
+      {planExercises.length > 0 ? (
+        <Pressable
+          style={styles.startButton}
+          onPress={() => navigation.navigate('Workout', { plan })}
+        >
+          <Text style={styles.startButtonText}>▶ Start Workout</Text>
+        </Pressable>
+      ) : null}
+
       <Pressable style={styles.addButton} onPress={() => setShowPicker(true)}>
         <Text style={styles.addButtonText}>+ Add Exercise</Text>
       </Pressable>
@@ -212,6 +221,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 32,
     fontSize: 15,
+  },
+  startButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  startButtonText: {
+    color: theme.colors.background,
+    fontWeight: '800',
+    fontSize: 16,
   },
   addButton: {
     backgroundColor: theme.colors.accent,

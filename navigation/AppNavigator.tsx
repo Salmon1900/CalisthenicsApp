@@ -9,6 +9,7 @@ import ExerciseDetailScreen from '../screens/ExerciseDetailScreen';
 import AdminScreen from '../screens/AdminScreen';
 import PlansScreen from '../screens/PlansScreen';
 import PlanDetailScreen from '../screens/PlanDetailScreen';
+import WorkoutScreen from '../screens/WorkoutScreen';
 
 enableScreens();
 
@@ -65,6 +66,11 @@ export function AppNavigator() {
           name="PlanDetail"
           component={PlanDetailScreen}
           options={{ title: 'Plan' }}
+        />
+        <Stack.Screen
+          name="Workout"
+          component={WorkoutScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

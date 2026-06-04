@@ -8,4 +8,7 @@ export const queryKeys = {
   planExercises: {
     byPlan: (planId: string) => ['planExercises', planId] as const,
   },
+  workouts: {
+    all: () => ['workouts'] as const,
+  },
 };

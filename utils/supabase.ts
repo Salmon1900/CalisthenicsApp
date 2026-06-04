@@ -40,6 +40,15 @@ export interface WorkoutPlanExercise {
   exercise?: Exercise;
 }
 
+export interface Workout {
+  id: string;
+  user_id: string | null;
+  workout_plan_id: string | null;
+  duration_seconds: number;
+  completion_percentage: number;
+  created_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -57,6 +66,11 @@ export interface Database {
         Row: WorkoutPlanExercise;
         Insert: Omit<WorkoutPlanExercise, 'id' | 'created_at' | 'exercise'>;
         Update: Partial<Omit<WorkoutPlanExercise, 'id' | 'created_at' | 'exercise'>>;
+      };
+      workouts: {
+        Row: Workout;
+        Insert: Omit<Workout, 'id' | 'created_at'>;
+        Update: Partial<Omit<Workout, 'id' | 'created_at'>>;
       };
     };
   };

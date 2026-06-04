@@ -1,8 +1,9 @@
 import { supabase } from './supabase';
-import type { Exercise, WorkoutPlan, WorkoutPlanExercise } from './supabase';
+import type { Exercise, Workout, WorkoutPlan, WorkoutPlanExercise } from './supabase';
 
 export type PlanExerciseWithExercise = WorkoutPlanExercise & { exercise: Exercise };
 export type NewExercise = Omit<Exercise, 'id' | 'created_at'>;
+export type NewWorkout = Omit<Workout, 'id' | 'created_at'>;
 
 export async function fetchExercises(): Promise<Exercise[]> {
   const { data, error } = await supabase
@@ -103,4 +104,9 @@ export async function reorderPlanExercises(
   );
   const failed = results.find((r) => r.error);
   if (failed?.error) throw new Error(failed.error.message);
+}
+
+export async function insertWorkout(workout: NewWorkout): Promise<void> {
+  const { error } = await supabase.from('workouts').insert(workout);
+  if (error) throw new Error(error.message);
 }
