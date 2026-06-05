@@ -83,6 +83,8 @@ function DecorationItem({
     return () => loop.stop();
   }, []);
 
+  const textStyle = { fontSize: size };
+
   if (type === 'sway') {
     const rotate = anim.interpolate({ inputRange: [0, 1], outputRange: ['-4deg', '4deg'] });
     return (
@@ -90,7 +92,7 @@ function DecorationItem({
         pointerEvents="none"
         style={[styles.decoration, { left: x, top: y, opacity: 0.22, transform: [{ rotate }] }]}
       >
-        <Text style={{ fontSize: size }}>{emoji}</Text>
+        <Text style={textStyle}>{emoji}</Text>
       </Animated.View>
     );
   }
@@ -101,7 +103,7 @@ function DecorationItem({
       pointerEvents="none"
       style={[styles.decoration, { left: x, top: y, opacity }]}
     >
-      <Text style={{ fontSize: size }}>{emoji}</Text>
+      <Text style={textStyle}>{emoji}</Text>
     </Animated.View>
   );
 }
@@ -139,7 +141,7 @@ export function MapDecorations({ canvasHeight, screenWidth }: Props) {
         const y = canvasHeight * d.yFraction;
         return (
           <DecorationItem
-            key={i}
+            key={`deco-${d.emoji}-${d.yFraction}`}
             emoji={d.emoji}
             x={x}
             y={y}
