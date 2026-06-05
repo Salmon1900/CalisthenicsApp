@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -5,12 +6,15 @@ import { theme } from '../constants/theme';
 import type { RootStackParamList } from '../types/navigation';
 import { useExercises } from '../hooks/useExercises';
 import type { Exercise } from '../utils/supabase';
+import { AddExerciseModal } from '../components/features/AddExerciseModal';
+import { DifficultyBadge } from '../components/ui/DifficultyBadge';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Exercises'>;
 
 export default function ExercisesScreen({ navigation }: Props) {
   const { exercises, loading, error, refetch } = useExercises();
   const insets = useSafeAreaInsets();
+  const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <SafeAreaView style={[styles.container, { paddingBottom: insets.bottom + 18 }]}>
@@ -42,12 +46,23 @@ export default function ExercisesScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('ExerciseDetail', { exercise: item })}
             >
               <Text style={styles.rowText}>{item.name}</Text>
+              <DifficultyBadge difficulty={item.difficulty} />
               <Text style={styles.arrow}>›</Text>
             </Pressable>
           )}
           ListEmptyComponent={<Text style={styles.statusText}>No exercises found yet.</Text>}
         />
       )}
+
+      <AddExerciseModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => { setModalVisible(false); refetch(); }}
+      />
+
+      <Pressable style={styles.addButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.addButtonText}>Add Exercise</Text>
+      </Pressable>
 
       <Pressable style={styles.backButton} onPress={() => navigation.navigate('Home')}>
         <Text style={styles.backButtonText}>Back to Home</Text>
@@ -128,6 +143,19 @@ const styles = StyleSheet.create({
     color: theme.colors.muted,
     fontSize: 22,
     marginLeft: 8,
+  },
+  addButton: {
+    backgroundColor: theme.colors.primary,
+    marginHorizontal: 18,
+    marginBottom: 12,
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: theme.colors.text,
+    fontWeight: '700',
+    fontSize: 16,
   },
   backButton: {
     backgroundColor: theme.colors.accent,

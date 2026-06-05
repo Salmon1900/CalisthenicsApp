@@ -4,18 +4,12 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { theme } from '../constants/theme';
 import type { RootStackParamList } from '../types/navigation';
 import { useDeleteExercise } from '../hooks/useDeleteExercise';
+import { DifficultyBadge } from '../components/ui/DifficultyBadge';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ExerciseDetail'>;
 
-const DIFFICULTY_COLORS: Record<string, string> = {
-  beginner: '#22c55e',
-  intermediate: '#f59e0b',
-  advanced: '#f87171',
-};
-
 export default function ExerciseDetailScreen({ route, navigation }: Props) {
   const { exercise } = route.params;
-  const difficultyColor = DIFFICULTY_COLORS[exercise.difficulty] ?? theme.colors.primary;
   const { deleteExercise, loading } = useDeleteExercise();
 
   const handleDelete = () => {
@@ -41,10 +35,8 @@ export default function ExerciseDetailScreen({ route, navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{exercise.name}</Text>
 
-        <View style={[styles.badge, { backgroundColor: difficultyColor + '22', borderColor: difficultyColor }]}>
-          <Text style={[styles.badgeText, { color: difficultyColor }]}>
-            {exercise.difficulty.toUpperCase()}
-          </Text>
+        <View style={styles.badgeWrapper}>
+          <DifficultyBadge difficulty={exercise.difficulty} />
         </View>
 
         <View style={styles.section}>
@@ -78,18 +70,8 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: 16,
   },
-  badge: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 14,
+  badgeWrapper: {
     marginBottom: 28,
-  },
-  badgeText: {
-    fontSize: 13,
-    fontWeight: '700',
-    letterSpacing: 1,
   },
   section: {
     backgroundColor: theme.colors.surface,

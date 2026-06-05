@@ -17,7 +17,7 @@ export interface Exercise {
   id: string;
   name: string;
   description: string | null;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  difficulty: number;
   type: 'reps' | 'timed';
   created_at: string;
 }

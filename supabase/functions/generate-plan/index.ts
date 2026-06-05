@@ -5,10 +5,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const DIFFICULTY_LABELS: Record<number, string> = {
+  1: 'Novice', 2: 'Beginner', 3: 'Easy', 4: 'Moderate',
+  5: 'Intermediate', 6: 'Challenging', 7: 'Hard',
+  8: 'Advanced', 9: 'Expert', 10: 'Master',
+};
+
 interface ExerciseInput {
   id: string;
   name: string;
-  difficulty: string;
+  difficulty: number;
   type: string;
 }
 
@@ -54,7 +60,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const exerciseList = exercises
-      .map((e) => `${e.id} | ${e.name} | ${e.difficulty} | ${e.type}`)
+      .map((e) => `${e.id} | ${e.name} | ${DIFFICULTY_LABELS[e.difficulty] ?? e.difficulty} | ${e.type}`)
       .join('\n');
 
     const prompt = `You are an expert calisthenics coach. Create a personalized workout plan.

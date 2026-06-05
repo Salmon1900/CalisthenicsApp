@@ -1,23 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { theme } from '../../../constants/theme';
-import type { Exercise } from '../../../utils/supabase';
 import type { PlanExerciseWithExercise } from '../../../utils/queryFunctions';
 import type { ExerciseStatus } from '../../../hooks/useWorkoutSession';
+import { getDifficultyColor, getDifficultyLabel } from '../../../utils/difficulty';
 
 interface Props {
   item: PlanExerciseWithExercise;
   status: ExerciseStatus;
 }
 
-const difficultyColors: Record<Exercise['difficulty'], string> = {
-  beginner: '#22c55e',
-  intermediate: '#f59e0b',
-  advanced: '#f87171',
-};
-
 export function WorkoutExerciseCard({ item, status }: Props) {
   const { exercise } = item;
-  const difficultyColor = difficultyColors[exercise.difficulty];
+  const difficultyColor = getDifficultyColor(exercise.difficulty);
   const quantityLabel =
     exercise.type === 'reps' ? `${item.quantity} reps` : `${item.quantity} sec`;
 
@@ -25,7 +19,7 @@ export function WorkoutExerciseCard({ item, status }: Props) {
     <View style={styles.card}>
       <View style={[styles.badge, { borderColor: difficultyColor }]}>
         <Text style={[styles.badgeText, { color: difficultyColor }]}>
-          {exercise.difficulty.toUpperCase()}
+          {getDifficultyLabel(exercise.difficulty).toUpperCase()}
         </Text>
       </View>
 

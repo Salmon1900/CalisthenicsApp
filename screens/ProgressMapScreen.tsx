@@ -15,7 +15,7 @@ import { useDeviceUserId } from '../hooks/useDeviceUserId';
 import { useProgressMap } from '../hooks/useProgressMap';
 import { LevelNode } from '../components/features/progressMap/LevelNode';
 import { MapPath } from '../components/features/progressMap/MapPath';
-import { MapDecorations } from '../components/features/progressMap/MapDecorations';
+import { MapBackground } from '../components/features/progressMap/MapBackground';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProgressMap'>;
 
@@ -100,7 +100,7 @@ export default function ProgressMapScreen({ navigation }: Props) {
         contentContainerStyle={{ height: CANVAS_HEIGHT }}
         showsVerticalScrollIndicator={false}
       >
-        <MapDecorations canvasHeight={CANVAS_HEIGHT} screenWidth={SCREEN_WIDTH} />
+        <MapBackground canvasHeight={CANVAS_HEIGHT} screenWidth={SCREEN_WIDTH} />
 
         {/* Path connectors rendered first (behind nodes) */}
         {levels.slice(0, -1).map((level, index) => {

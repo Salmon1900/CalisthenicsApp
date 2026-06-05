@@ -31,9 +31,6 @@ export default function HomeScreen({ navigation }: Props) {
         <Pressable style={[styles.button, styles.mapButton]} onPress={() => navigation.navigate('ProgressMap')}>
           <Text style={styles.buttonText}>Progress Map</Text>
         </Pressable>
-        <Pressable style={styles.adminButton} onPress={() => navigation.navigate('Admin')}>
-          <Text style={styles.adminButtonText}>Admin</Text>
-        </Pressable>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -103,18 +100,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e3a5f',
     borderWidth: 1,
     borderColor: theme.colors.primary,
-  },
-  adminButton: {
-    backgroundColor: theme.colors.surface,
-    paddingVertical: 13,
-    borderRadius: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
-  adminButtonText: {
-    color: theme.colors.muted,
-    fontWeight: '600',
-    fontSize: 14,
   },
 });

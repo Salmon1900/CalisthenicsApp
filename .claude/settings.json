@@ -1,4 +1,19 @@
 {
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:unsplash.com)",
+      "Bash(curl -L -o \"c:/Users/idans/Projects/CalisthenicsApp/assets/map/zone1_cave.jpg\" \"https://images.unsplash.com/photo-1694282890109-3081ae09b1e8?fm=jpg&q=80&w=800&fit=crop\" --silent --show-error)",
+      "Bash(curl -L -o \"c:/Users/idans/Projects/CalisthenicsApp/assets/map/zone2_forest.jpg\" \"https://images.unsplash.com/photo-1674033846163-fe3ea31c1f97?fm=jpg&q=80&w=800&fit=crop\" --silent --show-error)",
+      "Bash(curl -L -o \"c:/Users/idans/Projects/CalisthenicsApp/assets/map/zone3_mountain.jpg\" \"https://images.unsplash.com/photo-1755573310288-83597118de04?fm=jpg&q=80&w=800&fit=crop\" --silent --show-error)",
+      "Bash(curl -L -o \"c:/Users/idans/Projects/CalisthenicsApp/assets/map/zone4_sky.jpg\" \"https://images.unsplash.com/photo-1758101662980-31d7b4e5ed99?fm=jpg&q=80&w=800&fit=crop\" --silent --show-error)",
+      "Bash(curl -L -o \"c:/Users/idans/Projects/CalisthenicsApp/assets/map/zone5_space.jpg\" \"https://images.unsplash.com/photo-1538370965046-79c0d6907d47?fm=jpg&q=80&w=800&fit=crop\" --silent --show-error)",
+      "Bash(Get-ChildItem c:\\\\Users\\\\idans\\\\Projects\\\\CalisthenicsApp -Exclude node_modules)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(powershell -Command \"Get-ChildItem c:\\\\Users\\\\idans\\\\Projects\\\\CalisthenicsApp -Exclude node_modules | Select-Object Name, PSIsContainer\")",
+      "Bash(powershell -Command \"Get-ChildItem c:\\\\Users\\\\idans\\\\Projects\\\\CalisthenicsApp\\\\sql | Select-Object Name\")",
+      "Read(//c/Users/idans/AppData/Local/Temp/**)"
+    ]
+  },
   "enabledPlugins": {
     "expo@claude-plugins-official": true
   }

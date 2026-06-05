@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../../constants/theme';
 import { BossAura } from './BossAura';
-import { BouncingEmojis } from './BouncingEmojis';
+import { CurrentAura } from './CurrentAura';
 
 export type LevelNodeState = 'locked' | 'unlocked' | 'completed';
 
@@ -35,7 +35,7 @@ export function LevelNode({ level, state, isBoss, x, y, onPress }: LevelNodeProp
   return (
     <>
       {isBoss && <BossAura x={x} y={y} />}
-      {state === 'unlocked' && <BouncingEmojis level={level} x={x} y={y} />}
+      {!isBoss && state === 'unlocked' && <CurrentAura x={x} y={y} />}
       <Pressable
         style={[
           styles.node,

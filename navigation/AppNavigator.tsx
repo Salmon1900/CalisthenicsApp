@@ -6,7 +6,6 @@ import type { RootStackParamList } from '../types/navigation';
 import HomeScreen from '../screens/HomeScreen';
 import ExercisesScreen from '../screens/ExercisesScreen';
 import ExerciseDetailScreen from '../screens/ExerciseDetailScreen';
-import AdminScreen from '../screens/AdminScreen';
 import PlansScreen from '../screens/PlansScreen';
 import PlanDetailScreen from '../screens/PlanDetailScreen';
 import WorkoutScreen from '../screens/WorkoutScreen';
@@ -53,11 +52,6 @@ export function AppNavigator() {
           name="ExerciseDetail"
           component={ExerciseDetailScreen}
           options={{ title: 'Exercise' }}
-        />
-        <Stack.Screen
-          name="Admin"
-          component={AdminScreen}
-          options={{ title: 'Admin' }}
         />
         <Stack.Screen
           name="Plans"

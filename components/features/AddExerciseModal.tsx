@@ -11,11 +11,10 @@ import {
 import { theme } from '../../constants/theme';
 import { useAddExercise } from '../../hooks/useAddExercise';
 import type { Exercise } from '../../utils/supabase';
+import { DifficultySlider } from '../ui/DifficultySlider';
 
-type Difficulty = Exercise['difficulty'];
 type ExerciseType = Exercise['type'];
 
-const DIFFICULTIES: Difficulty[] = ['beginner', 'intermediate', 'advanced'];
 const TYPES: { value: ExerciseType; label: string }[] = [
   { value: 'reps', label: 'Reps' },
   { value: 'timed', label: 'Timed' },
@@ -30,7 +29,7 @@ interface Props {
 export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [difficulty, setDifficulty] = useState<Difficulty>('beginner');
+  const [difficulty, setDifficulty] = useState<number>(1);
   const [exerciseType, setExerciseType] = useState<ExerciseType>('reps');
   const [nameError, setNameError] = useState('');
 
@@ -39,7 +38,7 @@ export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
   const resetForm = () => {
     setName('');
     setDescription('');
-    setDifficulty('beginner');
+    setDifficulty(1);
     setExerciseType('reps');
     setNameError('');
   };
@@ -112,19 +111,7 @@ export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
           </View>
 
           <Text style={styles.label}>Difficulty</Text>
-          <View style={styles.chipRow}>
-            {DIFFICULTIES.map((d) => (
-              <Pressable
-                key={d}
-                style={[styles.chip, difficulty === d && styles.chipActive]}
-                onPress={() => setDifficulty(d)}
-              >
-                <Text style={[styles.chipText, difficulty === d && styles.chipTextActive]}>
-                  {d.charAt(0).toUpperCase() + d.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+          <DifficultySlider value={difficulty} onChange={setDifficulty} />
 
           {error ? <Text style={styles.saveError}>{error.message}</Text> : null}
 

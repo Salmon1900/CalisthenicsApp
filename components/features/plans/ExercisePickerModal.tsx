@@ -3,26 +3,21 @@ import {
   FlatList,
   Modal,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../../../constants/theme';
 import { useExercises } from '../../../hooks/useExercises';
 import type { Exercise } from '../../../utils/supabase';
+import { DifficultyBadge } from '../../ui/DifficultyBadge';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   onSelect: (exercise: Exercise) => void;
 }
-
-const DIFFICULTY_COLORS: Record<string, string> = {
-  beginner: '#22c55e',
-  intermediate: '#f59e0b',
-  advanced: '#f87171',
-};
 
 export function ExercisePickerModal({ visible, onClose, onSelect }: Props) {
   const { exercises, loading, error } = useExercises();
@@ -59,7 +54,6 @@ export function ExercisePickerModal({ visible, onClose, onSelect }: Props) {
             contentContainerStyle={styles.listContent}
             renderItem={({ item }: { item: Exercise }) => {
               const isReps = item.type === 'reps';
-              const diffColor = DIFFICULTY_COLORS[item.difficulty] ?? theme.colors.primary;
               return (
                 <Pressable
                   style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
@@ -72,11 +66,7 @@ export function ExercisePickerModal({ visible, onClose, onSelect }: Props) {
                         {isReps ? 'REPS' : 'TIMED'}
                       </Text>
                     </View>
-                    <View style={[styles.diffBadge, { backgroundColor: diffColor + '22', borderColor: diffColor }]}>
-                      <Text style={[styles.diffBadgeText, { color: diffColor }]}>
-                        {item.difficulty.toUpperCase()}
-                      </Text>
-                    </View>
+                    <DifficultyBadge difficulty={item.difficulty} />
                   </View>
                 </Pressable>
               );
@@ -190,16 +180,5 @@ const styles = StyleSheet.create({
   },
   typeTextTimed: {
     color: theme.colors.accent,
-  },
-  diffBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderWidth: 1,
-  },
-  diffBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
   },
 });
