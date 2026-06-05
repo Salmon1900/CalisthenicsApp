@@ -49,6 +49,15 @@ export interface Workout {
   created_at: string;
 }
 
+export interface MapLevel {
+  id: string;
+  level_number: number;
+  workout_plan_id: string;
+  is_boss: boolean;
+  created_at: string;
+  workout_plans?: WorkoutPlan;
+}
+
 export interface Database {
   public: {
     Tables: {

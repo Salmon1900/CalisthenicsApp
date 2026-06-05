@@ -11,4 +11,7 @@ export const queryKeys = {
   workouts: {
     all: () => ['workouts'] as const,
   },
+  progressMap: {
+    byUser: (userId: string) => ['progressMap', userId] as const,
+  },
 };

@@ -6,6 +6,8 @@ export type RootStackParamList = {
   ExerciseDetail: { exercise: Exercise };
   Admin: undefined;
   Plans: undefined;
-  PlanDetail: { plan: WorkoutPlan };
+  PlanDetail: { plan: WorkoutPlan; locked?: boolean };
+  PlanMaker: undefined;
   Workout: { plan: WorkoutPlan };
+  ProgressMap: undefined;
 };

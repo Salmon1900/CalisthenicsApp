@@ -86,9 +86,17 @@ export default function PlansScreen({ navigation }: Props) {
         />
       )}
 
-      <Pressable style={styles.createButton} onPress={() => setShowCreate(true)}>
-        <Text style={styles.createButtonText}>+ Create Plan</Text>
-      </Pressable>
+      <View style={styles.buttonRow}>
+        <Pressable style={[styles.createButton, styles.buttonFlex]} onPress={() => setShowCreate(true)}>
+          <Text style={styles.createButtonText}>+ Create Plan</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.createButton, styles.buttonFlex, styles.aiButton]}
+          onPress={() => navigation.navigate('PlanMaker')}
+        >
+          <Text style={styles.createButtonText}>✦ Plan Maker</Text>
+        </Pressable>
+      </View>
 
       <CreatePlanModal
         visible={showCreate}
@@ -179,6 +187,18 @@ const styles = StyleSheet.create({
     color: theme.colors.muted,
     fontSize: 22,
     marginLeft: 8,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+  buttonFlex: {
+    flex: 1,
+    marginHorizontal: 0,
+  },
+  aiButton: {
+    backgroundColor: theme.colors.primary,
   },
   createButton: {
     backgroundColor: theme.colors.accent,

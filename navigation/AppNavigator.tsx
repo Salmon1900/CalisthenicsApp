@@ -10,6 +10,8 @@ import AdminScreen from '../screens/AdminScreen';
 import PlansScreen from '../screens/PlansScreen';
 import PlanDetailScreen from '../screens/PlanDetailScreen';
 import WorkoutScreen from '../screens/WorkoutScreen';
+import PlanMakerScreen from '../screens/PlanMakerScreen';
+import ProgressMapScreen from '../screens/ProgressMapScreen';
 
 enableScreens();
 
@@ -68,8 +70,18 @@ export function AppNavigator() {
           options={{ title: 'Plan' }}
         />
         <Stack.Screen
+          name="PlanMaker"
+          component={PlanMakerScreen}
+          options={{ title: 'Plan Maker' }}
+        />
+        <Stack.Screen
           name="Workout"
           component={WorkoutScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ProgressMap"
+          component={ProgressMapScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

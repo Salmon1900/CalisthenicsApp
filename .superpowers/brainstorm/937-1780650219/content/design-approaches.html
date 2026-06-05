@@ -1,0 +1,289 @@
+<h2>Game-Like Map Design Approaches</h2>
+<p class="subtitle">Three directions for adding animated calisthenics decorations around level nodes</p>
+
+<style>
+  .map-demo {
+    background: #050816;
+    border-radius: 16px;
+    padding: 20px 10px;
+    position: relative;
+    overflow: hidden;
+    height: 360px;
+  }
+  .map-demo .path-line {
+    position: absolute;
+    height: 4px;
+    border-radius: 2px;
+    transform-origin: left center;
+  }
+  .node {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: #f8fafc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    z-index: 10;
+  }
+  .node.completed { background: #22c55e; }
+  .node.unlocked  { background: #38bdf8; }
+  .node.locked    { background: #374151; opacity: 0.6; }
+  .node.boss {
+    border: 3px solid #F59E0B;
+    box-shadow: 0 0 16px rgba(245,158,11,0.5);
+  }
+
+  /* ── APPROACH A: Orbiting emojis ── */
+  .orbit-wrap {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .emoji-orbit {
+    position: absolute;
+    font-size: 13px;
+    transform-origin: 0 0;
+    animation: orbit linear infinite;
+  }
+  @keyframes orbit {
+    from { transform: rotate(var(--start)) translateX(var(--r)) rotate(calc(-1 * var(--start))); }
+    to   { transform: rotate(calc(var(--start) + 360deg)) translateX(var(--r)) rotate(calc(-1 * (var(--start) + 360deg))); }
+  }
+  .emoji-bounce {
+    position: absolute;
+    font-size: 14px;
+    animation: bounce 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  /* ── APPROACH B: Sparkles + glow ring ── */
+  .glow-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(56,189,248,0.6);
+    animation: pulseRing 1.8s ease-out infinite;
+    pointer-events: none;
+    z-index: 5;
+  }
+  @keyframes pulseRing {
+    0%   { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .sparkle {
+    position: absolute;
+    font-size: 11px;
+    animation: sparkleFloat linear infinite;
+    pointer-events: none;
+    z-index: 6;
+  }
+  @keyframes sparkleFloat {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-28px) rotate(180deg); opacity: 0; }
+  }
+  .exercise-badge {
+    position: absolute;
+    background: rgba(30,40,60,0.9);
+    border: 1px solid rgba(56,189,248,0.4);
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 10px;
+    color: #94a3b8;
+    pointer-events: none;
+    z-index: 15;
+    white-space: nowrap;
+  }
+  .animated-path {
+    position: absolute;
+    height: 4px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(90deg, #38bdf8 0, #38bdf8 8px, transparent 8px, transparent 16px);
+    background-size: 32px 100%;
+    animation: dashFlow 1s linear infinite;
+  }
+  @keyframes dashFlow {
+    from { background-position: 0 0; }
+    to   { background-position: 32px 0; }
+  }
+
+  /* ── APPROACH C: Environment art + mascot ── */
+  .env-deco {
+    position: absolute;
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .env-deco.sway {
+    animation: sway 3s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+  @keyframes sway {
+    0%,100% { transform: rotate(-4deg); }
+    50%      { transform: rotate(4deg); }
+  }
+  .aura-ring {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,158,11,0.25) 0%, transparent 70%);
+    animation: auraBreath 2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 4;
+  }
+  @keyframes auraBreath {
+    0%,100% { transform: scale(1); opacity: 0.6; }
+    50%      { transform: scale(1.3); opacity: 1; }
+  }
+  .mascot {
+    position: absolute;
+    font-size: 22px;
+    animation: mascotFloat 2.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 20;
+  }
+  @keyframes mascotFloat {
+    0%,100% { transform: translateY(0) rotate(-5deg); }
+    50%      { transform: translateY(-8px) rotate(5deg); }
+  }
+
+  .demo-label {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-size: 10px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    z-index: 20;
+  }
+</style>
+
+<div class="cards">
+
+  <!-- ═══ CARD A ═══ -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="map-demo">
+        <span class="demo-label">Approach A</span>
+
+        <!-- paths -->
+        <div class="path-line" style="background:#22c55e;opacity:0.7;left:60px;top:288px;width:95px;transform:rotate(-25deg)"></div>
+        <div class="path-line" style="background:#38bdf8;opacity:0.6;left:118px;top:200px;width:90px;transform:rotate(18deg)"></div>
+        <div class="path-line" style="background:#374151;opacity:0.3;left:80px;top:115px;width:80px;transform:rotate(-15deg)"></div>
+
+        <!-- nodes -->
+        <div class="node completed" style="width:52px;height:52px;left:50px;top:270px">✓</div>
+        <div class="node unlocked" style="width:52px;height:52px;left:130px;top:185px">2</div>
+        <div class="node locked"   style="width:52px;height:52px;left:85px;top:100px">3</div>
+        <div class="node boss unlocked" style="width:72px;height:72px;left:140px;top:20px">★</div>
+
+        <!-- orbiting emojis around completed node -->
+        <div class="orbit-wrap" style="left:76px;top:296px">
+          <span class="emoji-orbit" style="--start:0deg;  --r:30px; animation-duration:3.5s">💪</span>
+          <span class="emoji-orbit" style="--start:120deg;--r:30px; animation-duration:3.5s">🔥</span>
+          <span class="emoji-orbit" style="--start:240deg;--r:30px; animation-duration:3.5s">⚡</span>
+        </div>
+
+        <!-- bouncing emojis near unlocked node -->
+        <span class="emoji-bounce" style="left:115px;top:165px;animation-delay:0s">🤸</span>
+        <span class="emoji-bounce" style="left:192px;top:175px;animation-delay:0.8s">🏃</span>
+
+        <!-- boss node emojis -->
+        <span class="emoji-bounce" style="left:138px;top:5px;animation-delay:0.3s">🏋️</span>
+        <span class="emoji-bounce" style="left:222px;top:22px;animation-delay:1s">🎯</span>
+        <span class="emoji-bounce" style="left:140px;top:85px;animation-delay:1.5s">💥</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Orbiting &amp; Bouncing Emojis</h3>
+      <p>Emoji icons orbit completed nodes and bounce near active ones. Lightest implementation — just React Native Animated + emoji Text nodes. Very playful, high energy.</p>
+    </div>
+  </div>
+
+  <!-- ═══ CARD B ═══ -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="map-demo">
+        <span class="demo-label">Approach B</span>
+
+        <!-- animated dashed path for completed -->
+        <div class="animated-path" style="left:60px;top:288px;width:95px;transform:rotate(-25deg)"></div>
+        <div class="path-line" style="background:#38bdf8;opacity:0.5;left:118px;top:200px;width:90px;transform:rotate(18deg)"></div>
+        <div class="path-line" style="background:#374151;opacity:0.3;left:80px;top:115px;width:80px;transform:rotate(-15deg)"></div>
+
+        <!-- nodes -->
+        <div class="node completed" style="width:52px;height:52px;left:50px;top:270px">✓</div>
+        <div class="node unlocked" style="width:52px;height:52px;left:130px;top:185px">2</div>
+        <div class="node locked"   style="width:52px;height:52px;left:85px;top:100px">3</div>
+        <div class="node boss unlocked" style="width:72px;height:72px;left:140px;top:20px">★</div>
+
+        <!-- pulse ring on unlocked node -->
+        <div class="glow-ring" style="width:52px;height:52px;left:130px;top:185px"></div>
+        <div class="glow-ring" style="width:52px;height:52px;left:130px;top:185px;animation-delay:0.9s"></div>
+
+        <!-- boss pulse (gold) -->
+        <div class="glow-ring" style="width:72px;height:72px;left:140px;top:20px;border-color:rgba(245,158,11,0.7)"></div>
+        <div class="glow-ring" style="width:72px;height:72px;left:140px;top:20px;border-color:rgba(245,158,11,0.5);animation-delay:0.9s"></div>
+
+        <!-- sparkles floating up from completed -->
+        <span class="sparkle" style="left:62px;top:275px;animation-duration:2s;animation-delay:0s">✨</span>
+        <span class="sparkle" style="left:80px;top:285px;animation-duration:2.5s;animation-delay:0.6s">⭐</span>
+        <span class="sparkle" style="left:96px;top:278px;animation-duration:1.8s;animation-delay:1.2s">✨</span>
+
+        <!-- exercise label badges -->
+        <div class="exercise-badge" style="left:105px;top:255px">💪 Push-ups</div>
+        <div class="exercise-badge" style="left:185px;top:188px">🤸 Core</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Sparkles + Pulsing Rings + Labels</h3>
+      <p>Animated dashed paths on completed routes, pulsing glow rings on the active node, floating ✨ sparkles above completed nodes, and small exercise-type badges. More structured, RPG-like.</p>
+    </div>
+  </div>
+
+  <!-- ═══ CARD C ═══ -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="map-demo">
+        <span class="demo-label">Approach C</span>
+
+        <!-- paths -->
+        <div class="path-line" style="background:#22c55e;opacity:0.7;left:60px;top:288px;width:95px;transform:rotate(-25deg)"></div>
+        <div class="path-line" style="background:#38bdf8;opacity:0.6;left:118px;top:200px;width:90px;transform:rotate(18deg)"></div>
+        <div class="path-line" style="background:#374151;opacity:0.3;left:80px;top:115px;width:80px;transform:rotate(-15deg)"></div>
+
+        <!-- environment decorations -->
+        <span class="env-deco sway" style="left:18px;top:210px">🌿</span>
+        <span class="env-deco sway" style="left:195px;top:140px;animation-delay:1s">🌿</span>
+        <span class="env-deco"      style="left:38px;top:150px;font-size:10px">⭐</span>
+        <span class="env-deco"      style="left:210px;top:80px;font-size:10px">⭐</span>
+        <span class="env-deco"      style="left:22px;top:60px;font-size:12px">🌟</span>
+        <span class="env-deco sway" style="left:215px;top:270px;animation-delay:0.5s">🌿</span>
+
+        <!-- aura on boss node -->
+        <div class="aura-ring" style="width:110px;height:110px;left:120px;top:0px"></div>
+
+        <!-- nodes -->
+        <div class="node completed" style="width:52px;height:52px;left:50px;top:270px">✓</div>
+        <div class="node unlocked" style="width:52px;height:52px;left:130px;top:185px">2</div>
+        <div class="node locked"   style="width:52px;height:52px;left:85px;top:100px">3</div>
+        <div class="node boss unlocked" style="width:72px;height:72px;left:140px;top:20px">★</div>
+
+        <!-- floating mascot near active node -->
+        <span class="mascot" style="left:192px;top:170px">🧗</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Environment Art + Mascot</h3>
+      <p>Swaying plants and stars scattered between nodes as world dressing, a floating calisthenics mascot emoji near the current level, and a breathing aura on boss nodes. Most atmospheric, adventure-map feel.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px">These can also be combined — e.g. C's environment art with A's orbiting emojis. Click your favorite or tell me what you want to mix.</p>

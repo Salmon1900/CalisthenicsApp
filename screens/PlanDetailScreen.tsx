@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { theme } from '../constants/theme';
@@ -15,7 +15,7 @@ type PlanExerciseWithExercise = WorkoutPlanExercise & { exercise: Exercise };
 type Props = NativeStackScreenProps<RootStackParamList, 'PlanDetail'>;
 
 export default function PlanDetailScreen({ route, navigation }: Props) {
-  const { plan: initialPlan } = route.params;
+  const { plan: initialPlan, locked = false } = route.params;
   const [plan, setPlan] = useState<WorkoutPlan>(initialPlan);
   const [showEdit, setShowEdit] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
@@ -23,11 +23,25 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
 
   const { planExercises, loading, error, refetch, addExercise, removeExercise, reorderExercises, updateQuantity } =
     usePlanExercises();
-  const { updatePlan } = usePlans();
+  const { updatePlan, deletePlan } = usePlans();
 
   useEffect(() => {
     refetch(plan.id);
   }, [plan.id]);
+
+  const handleDelete = () => {
+    Alert.alert('Delete Plan', `Delete "${plan.name}"? This cannot be undone.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await deletePlan(plan.id);
+          navigation.goBack();
+        },
+      },
+    ]);
+  };
 
   const handleEditSave = async (name: string, description: string) => {
     const success = await updatePlan(plan.id, { name, description: description || null });
@@ -100,9 +114,14 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
             </Text>
           ) : null}
         </View>
-        <Pressable style={styles.editButton} onPress={() => setShowEdit(true)}>
-          <Text style={styles.editButtonText}>Edit</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable style={styles.editButton} onPress={() => setShowEdit(true)}>
+            <Text style={styles.editButtonText}>Edit</Text>
+          </Pressable>
+          <Pressable style={[styles.editButton, styles.deleteButton]} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </Pressable>
+        </View>
       </View>
 
       {loading ? (
@@ -128,12 +147,18 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
       )}
 
       {planExercises.length > 0 ? (
-        <Pressable
-          style={styles.startButton}
-          onPress={() => navigation.navigate('Workout', { plan })}
-        >
-          <Text style={styles.startButtonText}>▶ Start Workout</Text>
-        </Pressable>
+        locked ? (
+          <View style={styles.lockedBanner}>
+            <Text style={styles.lockedText}>Complete all previous levels to unlock this workout</Text>
+          </View>
+        ) : (
+          <Pressable
+            style={styles.startButton}
+            onPress={() => navigation.navigate('Workout', { plan })}
+          >
+            <Text style={styles.startButtonText}>▶ Start Workout</Text>
+          </Pressable>
+        )
       ) : null}
 
       <Pressable style={styles.addButton} onPress={() => setShowPicker(true)}>
@@ -185,6 +210,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
     lineHeight: 20,
   },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   editButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -195,6 +224,14 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     color: theme.colors.primary,
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  deleteButton: {
+    borderColor: 'rgba(248,113,113,0.25)',
+  },
+  deleteButtonText: {
+    color: '#f87171',
     fontWeight: '700',
     fontSize: 14,
   },
@@ -238,6 +275,22 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontWeight: '800',
     fontSize: 16,
+  },
+  lockedBanner: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  lockedText: {
+    color: theme.colors.muted,
+    fontWeight: '600',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingHorizontal: 16,
   },
   addButton: {
     backgroundColor: theme.colors.accent,

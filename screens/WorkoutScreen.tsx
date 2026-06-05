@@ -9,6 +9,7 @@ import { usePlanExercises } from '../hooks/usePlanExercises';
 import { useWorkoutTimer } from '../hooks/useWorkoutTimer';
 import { useWorkoutSession } from '../hooks/useWorkoutSession';
 import { useSaveWorkout } from '../hooks/useSaveWorkout';
+import { useDeviceUserId } from '../hooks/useDeviceUserId';
 import { WorkoutTimer } from '../components/features/workout/WorkoutTimer';
 import { WorkoutExerciseCard } from '../components/features/workout/WorkoutExerciseCard';
 
@@ -22,6 +23,7 @@ export default function WorkoutScreen({ route, navigation }: Props) {
   const { elapsedSeconds, isRunning, pause, resume } = useWorkoutTimer();
   const session = useWorkoutSession(planExercises);
   const { saveWorkout, saving } = useSaveWorkout();
+  const userId = useDeviceUserId();
 
   useEffect(() => {
     refetch(plan.id);
@@ -42,7 +44,7 @@ export default function WorkoutScreen({ route, navigation }: Props) {
   const handleFinish = async () => {
     const ok = await saveWorkout({
       workout_plan_id: plan.id,
-      user_id: null,
+      user_id: userId,
       duration_seconds: elapsedSeconds,
       completion_percentage: session.completionPercentage,
     });
