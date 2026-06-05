@@ -136,7 +136,7 @@ function StarSpeck({ x, y, duration }: { x: number; y: number; duration: number 
 export function MapDecorations({ canvasHeight, screenWidth }: Props) {
   return (
     <>
-      {DECORATIONS.map((d, i) => {
+      {DECORATIONS.map((d) => {
         const x = d.xLeft ? d.xOffset : screenWidth - d.xOffset - d.size;
         const y = canvasHeight * d.yFraction;
         return (

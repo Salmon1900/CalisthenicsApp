@@ -52,12 +52,11 @@ export function BouncingEmojis({ level, x, y }: { level: number; x: number; y: n
         <Animated.View
           key={i}
           pointerEvents="none"
-          style={{
-            position: 'absolute',
+          style={[styles.emoji, {
             left: x + BOUNCE_OFFSETS[i].dx,
             top: y + BOUNCE_OFFSETS[i].dy,
             transform: [{ translateY: translateYValues[i] }],
-          }}
+          }]}
         >
           <Text style={styles.emojiText}>{emoji}</Text>
         </Animated.View>
@@ -67,6 +66,9 @@ export function BouncingEmojis({ level, x, y }: { level: number; x: number; y: n
 }
 
 const styles = StyleSheet.create({
+  emoji: {
+    position: 'absolute',
+  },
   emojiText: {
     fontSize: 15,
   },
