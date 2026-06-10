@@ -31,6 +31,9 @@ export default function HomeScreen({ navigation }: Props) {
         <Pressable style={[styles.button, styles.mapButton]} onPress={() => navigation.navigate('ProgressMap')}>
           <Text style={styles.buttonText}>Progress Map</Text>
         </Pressable>
+        <Pressable style={[styles.button, styles.coachButton]} onPress={() => navigation.navigate('DigitalCoach')}>
+          <Text style={styles.buttonText}>Digital Coach</Text>
+        </Pressable>
       </SafeAreaView>
     </ImageBackground>
   );
@@ -100,5 +103,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e3a5f',
     borderWidth: 1,
     borderColor: theme.colors.primary,
+  },
+  coachButton: {
+    backgroundColor: theme.colors.primary,
   },
 });

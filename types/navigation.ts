@@ -9,4 +9,6 @@ export type RootStackParamList = {
   PlanMaker: undefined;
   Workout: { plan: WorkoutPlan };
   ProgressMap: undefined;
+  DigitalCoach: undefined;
+  DigitalCoachResult: { exerciseDisplayName: string; videoUri: string };
 };

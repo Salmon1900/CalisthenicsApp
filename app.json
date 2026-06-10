@@ -13,7 +13,7 @@
       "package": "com.idansalmon.mighty",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/LOGO.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -26,6 +26,17 @@
       "eas": {
         "projectId": "6c8c4e2a-9e43-4935-ac92-f12a4d9b972b"
       }
-    }
+    },
+    "plugins": [
+      "expo-video",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Mighty needs access to your videos so you can submit a clip for technique analysis.",
+          "cameraPermission": "Mighty needs camera access so you can record an exercise for technique analysis.",
+          "microphonePermission": "Mighty needs microphone access to record video with sound."
+        }
+      ]
+    ]
   }
 }

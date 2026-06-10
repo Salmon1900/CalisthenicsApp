@@ -26,14 +26,17 @@ const NODE_SIZE_BOSS = 80;
 const VERTICAL_SPACING = 110;
 const BOTTOM_PADDING = 80;
 const TOP_PADDING = 100;
-const CANVAS_HEIGHT = 70 * VERTICAL_SPACING + BOTTOM_PADDING + TOP_PADDING;
 
 const X_PATTERN = [0, 80, 120, 80, 0, -80, -120, -80];
 
-function getLevelPosition(levelNumber: number) {
+function canvasHeightFor(totalLevels: number) {
+  return totalLevels * VERTICAL_SPACING + BOTTOM_PADDING + TOP_PADDING;
+}
+
+function getLevelPosition(levelNumber: number, canvasHeight: number) {
   const xOffset = X_PATTERN[(levelNumber - 1) % 8];
   const x = SCREEN_WIDTH / 2 + xOffset;
-  const y = CANVAS_HEIGHT - BOTTOM_PADDING - (levelNumber - 1) * VERTICAL_SPACING;
+  const y = canvasHeight - BOTTOM_PADDING - (levelNumber - 1) * VERTICAL_SPACING;
   return { x, y };
 }
 
@@ -46,7 +49,7 @@ export default function ProgressMapScreen({ navigation }: Props) {
     if (levels.length === 0) return;
     const highestUnlocked = [...levels].reverse().find((l) => l.isUnlocked);
     if (!highestUnlocked) return;
-    const { y } = getLevelPosition(highestUnlocked.levelNumber);
+    const { y } = getLevelPosition(highestUnlocked.levelNumber, canvasHeightFor(levels.length));
     const scrollY = y - SCREEN_HEIGHT / 2;
     setTimeout(() => {
       scrollRef.current?.scrollTo({ y: Math.max(0, scrollY), animated: false });
@@ -86,6 +89,7 @@ export default function ProgressMapScreen({ navigation }: Props) {
   }
 
   const completedCount = levels.filter((l) => l.isCompleted).length;
+  const canvasHeight = canvasHeightFor(levels.length);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -97,16 +101,16 @@ export default function ProgressMapScreen({ navigation }: Props) {
       <ScrollView
         ref={scrollRef}
         style={styles.scroll}
-        contentContainerStyle={{ height: CANVAS_HEIGHT }}
+        contentContainerStyle={{ height: canvasHeight }}
         showsVerticalScrollIndicator={false}
       >
-        <MapBackground canvasHeight={CANVAS_HEIGHT} screenWidth={SCREEN_WIDTH} />
+        <MapBackground canvasHeight={canvasHeight} screenWidth={SCREEN_WIDTH} />
 
         {/* Path connectors rendered first (behind nodes) */}
         {levels.slice(0, -1).map((level, index) => {
           const next = levels[index + 1];
-          const from = getLevelPosition(level.levelNumber);
-          const to = getLevelPosition(next.levelNumber);
+          const from = getLevelPosition(level.levelNumber, canvasHeight);
+          const to = getLevelPosition(next.levelNumber, canvasHeight);
           return (
             <MapPath
               key={`path-${level.levelNumber}`}
@@ -121,7 +125,7 @@ export default function ProgressMapScreen({ navigation }: Props) {
 
         {/* Level nodes rendered on top of paths */}
         {levels.map((level) => {
-          const { x, y } = getLevelPosition(level.levelNumber);
+          const { x, y } = getLevelPosition(level.levelNumber, canvasHeight);
           const state = level.isCompleted ? 'completed' : level.isUnlocked ? 'unlocked' : 'locked';
           return (
             <LevelNode

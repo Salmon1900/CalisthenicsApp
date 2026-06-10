@@ -11,7 +11,8 @@
       "Bash(Select-Object Name, PSIsContainer)",
       "Bash(powershell -Command \"Get-ChildItem c:\\\\Users\\\\idans\\\\Projects\\\\CalisthenicsApp -Exclude node_modules | Select-Object Name, PSIsContainer\")",
       "Bash(powershell -Command \"Get-ChildItem c:\\\\Users\\\\idans\\\\Projects\\\\CalisthenicsApp\\\\sql | Select-Object Name\")",
-      "Read(//c/Users/idans/AppData/Local/Temp/**)"
+      "Read(//c/Users/idans/AppData/Local/Temp/**)",
+      "Bash(npx tsc *)"
     ]
   },
   "enabledPlugins": {

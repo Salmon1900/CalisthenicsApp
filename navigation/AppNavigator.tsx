@@ -11,6 +11,8 @@ import PlanDetailScreen from '../screens/PlanDetailScreen';
 import WorkoutScreen from '../screens/WorkoutScreen';
 import PlanMakerScreen from '../screens/PlanMakerScreen';
 import ProgressMapScreen from '../screens/ProgressMapScreen';
+import DigitalCoachScreen from '../screens/DigitalCoachScreen';
+import DigitalCoachResultScreen from '../screens/DigitalCoachResultScreen';
 
 enableScreens();
 
@@ -77,6 +79,16 @@ export function AppNavigator() {
           name="ProgressMap"
           component={ProgressMapScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="DigitalCoach"
+          component={DigitalCoachScreen}
+          options={{ title: 'Digital Coach' }}
+        />
+        <Stack.Screen
+          name="DigitalCoachResult"
+          component={DigitalCoachResultScreen}
+          options={{ title: 'Analysis' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
