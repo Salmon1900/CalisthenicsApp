@@ -78,7 +78,9 @@ export async function getExercises(): Promise<string[]> {
   let response: Response;
   try {
     response = await fetch(buildUrl(`${API_PREFIX}/exercises`));
-  } catch {
+  } catch (error){
+    console.error('*********Error fetching exercises:*********');
+    console.error(error);
     throw new DigitalCoachError('network', 'Could not reach Digital Coach. Check your connection.');
   }
   if (!response.ok) {
@@ -128,7 +130,9 @@ export function analyze(exerciseName: string, videoUri: string): Promise<Analysi
         reject(mapError(xhr.status, body as ErrorBody | null));
       }
     };
-    xhr.onerror = () => {
+    xhr.onerror = (e) => {
+    console.error('*********Error analyzing video:*********');
+    console.error(e);
       reject(new DigitalCoachError('network', 'Could not reach Digital Coach. Check your connection.'));
     };
     xhr.ontimeout = () => {

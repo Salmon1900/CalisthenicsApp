@@ -27,8 +27,11 @@ interface GeneratePlanRequest {
 interface GeneratedExercise {
   exercise_id: string;
   quantity: number;
+  sets?: number;
   order_index: number;
 }
+
+const DEFAULT_SETS = 3;
 
 interface GeneratedPlan {
   name: string;
@@ -77,11 +80,11 @@ Return ONLY a valid JSON object with no markdown, no explanation, no code fences
   "name": "short descriptive plan name",
   "description": "1-2 sentence description of the plan",
   "exercises": [
-    { "exercise_id": "<exact uuid from list>", "quantity": <number>, "order_index": <0-based index> }
+    { "exercise_id": "<exact uuid from list>", "quantity": <number>, "sets": <number>, "order_index": <0-based index> }
   ]
 }
 
-Choose 4-8 exercises appropriate for the goals and difficulty level. For reps type use rep counts (5-20), for timed type use seconds (20-60).`;
+Choose 4-8 exercises appropriate for the goals and difficulty level. For reps type use rep counts (5-20), for timed type use seconds (20-60). For sets use 2-4 (default 3); quantity is the per-set amount.`;
 
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -154,6 +157,7 @@ Choose 4-8 exercises appropriate for the goals and difficulty level. For reps ty
       exercise_id: e.exercise_id,
       order_index: i,
       quantity: e.quantity,
+      sets: e.sets && e.sets >= 1 ? e.sets : DEFAULT_SETS,
     }));
 
     const { error: exError } = await db.from('workout_plan_exercises').insert(planExercises);

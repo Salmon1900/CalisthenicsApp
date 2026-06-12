@@ -1,29 +1,20 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { theme } from '../../../constants/theme';
-import type { Exercise, WorkoutPlanExercise } from '../../../utils/supabase';
+import type { PlanExerciseWithExercise } from '../../../utils/queryFunctions';
+import { formatSetSummary } from '../../../utils/sets';
 
 interface Props {
-  item: WorkoutPlanExercise & { exercise: Exercise };
+  item: PlanExerciseWithExercise;
   isFirst: boolean;
   isLast: boolean;
   onRemove: (id: string) => void;
-  onQuantityChange: (id: string, quantity: number) => void;
+  onEdit: (item: PlanExerciseWithExercise) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
 }
 
-export function PlanExerciseRow({ item, isFirst, isLast, onRemove, onQuantityChange, onMoveUp, onMoveDown }: Props) {
-  const [quantityText, setQuantityText] = useState(String(item.quantity));
-
-  useEffect(() => {
-    setQuantityText(String(item.quantity));
-  }, [item.id]);
-
-  const isReps = item.exercise.type === 'reps';
-  const badgeStyle = isReps ? styles.badgeReps : styles.badgeTimed;
-  const badgeTextStyle = isReps ? styles.badgeTextReps : styles.badgeTextTimed;
-  const badgeLabel = isReps ? 'REPS' : 'SECS';
+export function PlanExerciseRow({ item, isFirst, isLast, onRemove, onEdit, onMoveUp, onMoveDown }: Props) {
+  const summary = `${formatSetSummary(item)} · ${item.rest_seconds}s rest`;
 
   return (
     <View style={styles.row}>
@@ -44,27 +35,14 @@ export function PlanExerciseRow({ item, isFirst, isLast, onRemove, onQuantityCha
         </Pressable>
       </View>
 
-      <Text style={styles.name} numberOfLines={1}>{item.exercise.name}</Text>
+      <Pressable style={styles.info} onPress={() => onEdit(item)}>
+        <Text style={styles.name} numberOfLines={1}>{item.exercise.name}</Text>
+        <Text style={styles.summary} numberOfLines={1}>{summary}</Text>
+      </Pressable>
 
-      <View style={[styles.badge, badgeStyle]}>
-        <Text style={[styles.badgeText, badgeTextStyle]}>{badgeLabel}</Text>
-      </View>
-
-      <TextInput
-        style={styles.quantityInput}
-        value={quantityText}
-        onChangeText={setQuantityText}
-        onBlur={() => {
-          const parsed = parseInt(quantityText, 10);
-          if (!isNaN(parsed) && parsed > 0) {
-            onQuantityChange(item.id, parsed);
-          } else {
-            setQuantityText(String(item.quantity));
-          }
-        }}
-        keyboardType="numeric"
-        selectTextOnFocus
-      />
+      <Pressable onPress={() => onEdit(item)} style={styles.editButton}>
+        <Text style={styles.editText}>Edit</Text>
+      </Pressable>
 
       <Pressable onPress={() => onRemove(item.id)} style={styles.removeButton}>
         <Text style={styles.removeText}>{'×'}</Text>
@@ -105,49 +83,32 @@ const styles = StyleSheet.create({
   arrowTextDisabled: {
     color: theme.colors.muted,
   },
-  name: {
+  info: {
     flex: 1,
+  },
+  name: {
     color: theme.colors.text,
     fontSize: 15,
     fontWeight: '600',
   },
-  badge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderWidth: 1,
+  summary: {
+    color: theme.colors.muted,
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 2,
   },
-  badgeReps: {
-    backgroundColor: 'rgba(56,189,248,0.12)',
-    borderColor: theme.colors.primary,
-  },
-  badgeTimed: {
-    backgroundColor: 'rgba(139,92,246,0.12)',
-    borderColor: theme.colors.accent,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  badgeTextReps: {
-    color: theme.colors.primary,
-  },
-  badgeTextTimed: {
-    color: theme.colors.accent,
-  },
-  quantityInput: {
-    backgroundColor: theme.colors.background,
-    color: theme.colors.text,
-    borderRadius: 8,
-    paddingHorizontal: 10,
+  editButton: {
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    width: 52,
-    textAlign: 'center',
-    fontSize: 15,
-    fontWeight: '700',
+    backgroundColor: theme.colors.background,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
+  },
+  editText: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: '700',
   },
   removeButton: {
     paddingHorizontal: 6,

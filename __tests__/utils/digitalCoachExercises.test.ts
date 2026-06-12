@@ -8,6 +8,8 @@ function makeExercise(name: string): Exercise {
     description: null,
     difficulty: 1,
     type: 'reps',
+    category: 'strength',
+    phase: 'pre',
     created_at: '2026-01-01T00:00:00Z',
   };
 }

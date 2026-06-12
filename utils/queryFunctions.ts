@@ -5,6 +5,15 @@ export type PlanExerciseWithExercise = WorkoutPlanExercise & { exercise: Exercis
 export type NewExercise = Omit<Exercise, 'id' | 'created_at'>;
 export type NewWorkout = Omit<Workout, 'id' | 'created_at'>;
 
+/** Editable per-set configuration of a plan exercise. */
+export type PlanExerciseConfig = Pick<
+  WorkoutPlanExercise,
+  'quantity' | 'sets' | 'set_reps' | 'rest_seconds'
+>;
+
+export const DEFAULT_SETS = 3;
+export const DEFAULT_REST_SECONDS = 60;
+
 export async function fetchExercises(): Promise<Exercise[]> {
   const { data, error } = await supabase
     .from('exercises')
@@ -71,12 +80,16 @@ export async function insertPlanExercise(
   exerciseId: string,
   quantity: number,
   maxIndex: number,
+  config?: Partial<Omit<PlanExerciseConfig, 'quantity'>>,
 ): Promise<void> {
   const { error } = await supabase.from('workout_plan_exercises').insert({
     workout_plan_id: planId,
     exercise_id: exerciseId,
     order_index: maxIndex + 1,
     quantity,
+    sets: config?.sets ?? DEFAULT_SETS,
+    set_reps: config?.set_reps ?? null,
+    rest_seconds: config?.rest_seconds ?? DEFAULT_REST_SECONDS,
   });
   if (error) throw new Error(error.message);
 }
@@ -86,10 +99,13 @@ export async function deletePlanExerciseById(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-export async function updatePlanExerciseQuantity(id: string, quantity: number): Promise<void> {
+export async function updatePlanExerciseConfig(
+  id: string,
+  config: PlanExerciseConfig,
+): Promise<void> {
   const { error } = await supabase
     .from('workout_plan_exercises')
-    .update({ quantity })
+    .update(config)
     .eq('id', id);
   if (error) throw new Error(error.message);
 }

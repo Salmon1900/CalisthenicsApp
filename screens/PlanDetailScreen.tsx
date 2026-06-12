@@ -9,7 +9,9 @@ import { usePlanExercises } from '../hooks/usePlanExercises';
 import { usePlans } from '../hooks/usePlans';
 import { CreatePlanModal } from '../components/features/plans/CreatePlanModal';
 import { ExercisePickerModal } from '../components/features/plans/ExercisePickerModal';
+import { PlanExerciseEditorModal } from '../components/features/plans/PlanExerciseEditorModal';
 import { PlanExerciseRow } from '../components/features/plans/PlanExerciseRow';
+import type { PlanExerciseConfig } from '../utils/queryFunctions';
 
 type PlanExerciseWithExercise = WorkoutPlanExercise & { exercise: Exercise };
 type Props = NativeStackScreenProps<RootStackParamList, 'PlanDetail'>;
@@ -19,9 +21,10 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
   const [plan, setPlan] = useState<WorkoutPlan>(initialPlan);
   const [showEdit, setShowEdit] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [editingExercise, setEditingExercise] = useState<PlanExerciseWithExercise | null>(null);
   const insets = useSafeAreaInsets();
 
-  const { planExercises, loading, error, refetch, addExercise, removeExercise, reorderExercises, updateQuantity } =
+  const { planExercises, loading, error, refetch, addExercise, removeExercise, reorderExercises, updateConfig } =
     usePlanExercises();
   const { updatePlan, deletePlan } = usePlans();
 
@@ -63,8 +66,11 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
     await refetch(plan.id);
   };
 
-  const handleQuantityChange = async (id: string, quantity: number) => {
-    await updateQuantity(id, quantity);
+  const handleEditConfig = async (config: PlanExerciseConfig) => {
+    if (!editingExercise) return;
+    await updateConfig(editingExercise.id, config);
+    setEditingExercise(null);
+    await refetch(plan.id);
   };
 
   const handleMoveUp = async (id: string) => {
@@ -97,7 +103,7 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
       isFirst={index === 0}
       isLast={index === planExercises.length - 1}
       onRemove={handleRemove}
-      onQuantityChange={handleQuantityChange}
+      onEdit={setEditingExercise}
       onMoveUp={handleMoveUp}
       onMoveDown={handleMoveDown}
     />
@@ -178,6 +184,13 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
         visible={showPicker}
         onClose={() => setShowPicker(false)}
         onSelect={handlePickExercise}
+      />
+
+      <PlanExerciseEditorModal
+        visible={editingExercise !== null}
+        item={editingExercise}
+        onClose={() => setEditingExercise(null)}
+        onSave={handleEditConfig}
       />
     </SafeAreaView>
   );

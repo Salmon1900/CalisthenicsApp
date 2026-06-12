@@ -13,12 +13,25 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Type definitions for database tables
+export type ExerciseCategory =
+  | 'strength'
+  | 'warmup'
+  | 'dynamic_stretch'
+  | 'static_stretch'
+  | 'mobility';
+
+export type ExercisePhase = 'pre' | 'post' | 'both';
+
 export interface Exercise {
   id: string;
   name: string;
   description: string | null;
   difficulty: number;
   type: 'reps' | 'timed';
+  /** Movement category — distinguishes warmups/stretches from strength work. */
+  category: ExerciseCategory;
+  /** When the exercise belongs in a session: pre-workout, post-workout, or both. */
+  phase: ExercisePhase;
   created_at: string;
 }
 
@@ -35,7 +48,14 @@ export interface WorkoutPlanExercise {
   workout_plan_id: string;
   exercise_id: string;
   order_index: number;
+  /** Per-set base value: reps for `reps` exercises, seconds for `timed`. */
   quantity: number;
+  /** Number of sets to perform. */
+  sets: number;
+  /** Per-set override list; null means every set uses `quantity`. */
+  set_reps: number[] | null;
+  /** Rest in seconds between sets. */
+  rest_seconds: number;
   created_at: string;
   exercise?: Exercise;
 }

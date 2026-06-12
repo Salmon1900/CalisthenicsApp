@@ -60,6 +60,8 @@ export function AddExerciseModal({ visible, onClose, onSuccess }: Props) {
       description: description.trim() || null,
       difficulty,
       type: exerciseType,
+      category: 'strength',
+      phase: 'pre',
     });
 
     if (success) {

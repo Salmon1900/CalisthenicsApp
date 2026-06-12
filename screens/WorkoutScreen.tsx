@@ -8,10 +8,12 @@ import { formatElapsed } from '../utils/formatTime';
 import { usePlanExercises } from '../hooks/usePlanExercises';
 import { useWorkoutTimer } from '../hooks/useWorkoutTimer';
 import { useWorkoutSession } from '../hooks/useWorkoutSession';
+import { useRestTimer } from '../hooks/useRestTimer';
 import { useSaveWorkout } from '../hooks/useSaveWorkout';
 import { useDeviceUserId } from '../hooks/useDeviceUserId';
 import { WorkoutTimer } from '../components/features/workout/WorkoutTimer';
 import { WorkoutExerciseCard } from '../components/features/workout/WorkoutExerciseCard';
+import { RestTimerBanner } from '../components/features/workout/RestTimerBanner';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Workout'>;
 
@@ -22,6 +24,7 @@ export default function WorkoutScreen({ route, navigation }: Props) {
   const { planExercises, loading, error, refetch } = usePlanExercises();
   const { elapsedSeconds, isRunning, pause, resume } = useWorkoutTimer();
   const session = useWorkoutSession(planExercises);
+  const restTimer = useRestTimer();
   const { saveWorkout, saving } = useSaveWorkout();
   const userId = useDeviceUserId();
 
@@ -32,6 +35,24 @@ export default function WorkoutScreen({ route, navigation }: Props) {
   const handleToggleTimer = () => {
     if (isRunning) pause();
     else resume();
+  };
+
+  const handleCompleteSet = () => {
+    session.markSetCompleted();
+    // Rest only when more sets remain for this exercise.
+    if (session.completedSets + 1 < session.currentTotalSets && session.current) {
+      restTimer.start(session.current.rest_seconds);
+    }
+  };
+
+  const handleNextExercise = () => {
+    restTimer.skip();
+    session.goNext();
+  };
+
+  const handleSkip = () => {
+    restTimer.skip();
+    session.markSkipped();
   };
 
   const handleCancel = () => {
@@ -86,44 +107,78 @@ export default function WorkoutScreen({ route, navigation }: Props) {
 
     return (
       <View style={styles.body}>
-        <WorkoutTimer elapsedSeconds={elapsedSeconds} isRunning={isRunning} onToggle={handleToggleTimer} />
+        <View style={styles.stage}>
+          <WorkoutTimer
+            elapsedSeconds={elapsedSeconds}
+            isRunning={isRunning}
+            onToggle={handleToggleTimer}
+          />
 
-        <Text style={styles.progress}>
-          Exercise {session.currentIndex + 1} of {session.total}
-        </Text>
+          <Text style={styles.progress}>
+            Exercise {session.currentIndex + 1} of {session.total}
+          </Text>
 
-        <WorkoutExerciseCard item={session.current} status={session.currentStatus} />
-
-        <View style={styles.navRow}>
-          <Pressable
-            style={[styles.navButton, session.currentIndex === 0 && styles.navButtonDisabled]}
-            onPress={session.goPrev}
-            disabled={session.currentIndex === 0}
-          >
-            <Text style={styles.navButtonText}>‹ Prev</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.navButton,
-              session.currentIndex >= session.total - 1 && styles.navButtonDisabled,
-            ]}
-            onPress={session.goNext}
-            disabled={session.currentIndex >= session.total - 1}
-          >
-            <Text style={styles.navButtonText}>Next ›</Text>
-          </Pressable>
+          <WorkoutExerciseCard
+            item={session.current}
+            status={session.currentStatus}
+            currentSetIndex={session.currentSetIndex}
+            totalSets={session.currentTotalSets}
+            completedSets={session.completedSets}
+            currentReps={session.currentReps}
+          />
         </View>
 
-        <View style={styles.actionRow}>
-          <Pressable style={[styles.actionButton, styles.skipButton]} onPress={session.markSkipped}>
-            <Text style={styles.skipButtonText}>Skip</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.actionButton, styles.completeButton]}
-            onPress={session.markCompleted}
-          >
-            <Text style={styles.completeButtonText}>Complete</Text>
-          </Pressable>
+        <View style={styles.controls}>
+          <View style={styles.navRow}>
+            <Pressable
+              style={[styles.navButton, session.currentIndex === 0 && styles.navButtonDisabled]}
+              onPress={session.goPrev}
+              disabled={session.currentIndex === 0}
+            >
+              <Text style={styles.navButtonText}>‹ Prev</Text>
+            </Pressable>
+            <Pressable
+              style={[
+                styles.navButton,
+                session.currentIndex >= session.total - 1 && styles.navButtonDisabled,
+              ]}
+              onPress={session.goNext}
+              disabled={session.currentIndex >= session.total - 1}
+            >
+              <Text style={styles.navButtonText}>Next ›</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.actionSlot}>
+            {restTimer.isResting ? (
+              <RestTimerBanner secondsLeft={restTimer.secondsLeft} onSkip={restTimer.skip} />
+            ) : session.allSetsDone ? (
+              session.currentIndex < session.total - 1 ? (
+                <Pressable
+                  style={[styles.soloButton, styles.completeButton]}
+                  onPress={handleNextExercise}
+                >
+                  <Text style={styles.completeButtonText}>Next exercise →</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.doneHint}>
+                  All sets done — tap Finish to save your workout.
+                </Text>
+              )
+            ) : (
+              <View style={styles.actionRow}>
+                <Pressable style={[styles.actionButton, styles.skipButton]} onPress={handleSkip}>
+                  <Text style={styles.skipButtonText}>Skip</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.actionButton, styles.completeButton]}
+                  onPress={handleCompleteSet}
+                >
+                  <Text style={styles.completeButtonText}>Complete Set</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
         </View>
       </View>
     );
@@ -171,8 +226,25 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    gap: 16,
+  },
+  // Flexible region that holds the timer, progress label and exercise card.
+  // It absorbs all spare vertical space so the controls below stay anchored.
+  stage: {
+    flex: 1,
     justifyContent: 'center',
-    gap: 24,
+    gap: 16,
+  },
+  // Fixed-flow block pinned under the stage: nav row + the action slot.
+  controls: {
+    gap: 12,
+  },
+  // Stable-height container so swapping between the Skip/Complete row, the
+  // "Next exercise" button, the rest banner, or the done hint never shifts
+  // the layout or pushes anything onto the footer.
+  actionSlot: {
+    minHeight: 56,
+    justifyContent: 'center',
   },
   progress: {
     color: theme.colors.muted,
@@ -205,8 +277,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
+  doneHint: {
+    color: theme.colors.muted,
+    fontSize: 15,
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
   actionButton: {
     flex: 1,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  // Full-width button used on its own (no row), without flex so it keeps a
+  // natural height inside the column-oriented action slot.
+  soloButton: {
+    alignSelf: 'stretch',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',

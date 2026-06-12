@@ -4,7 +4,16 @@ import type { MatchedExercise } from '../../../../utils/digitalCoachExercises';
 import type { Exercise } from '../../../../utils/supabase';
 
 function makeExercise(id: string, name: string): Exercise {
-  return { id, name, description: null, difficulty: 1, type: 'reps', created_at: '2026-01-01T00:00:00Z' };
+  return {
+    id,
+    name,
+    description: null,
+    difficulty: 1,
+    type: 'reps',
+    category: 'strength',
+    phase: 'pre',
+    created_at: '2026-01-01T00:00:00Z',
+  };
 }
 
 const items: MatchedExercise[] = [

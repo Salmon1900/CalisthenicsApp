@@ -12,13 +12,15 @@ https://wshezrsjjeippmvucsjm.supabase.co
 
 ### exercises
 - RLS: enabled
-- Rows: 24 (seeded exercise catalog)
+- Rows: 181 (seeded exercise catalog, including warmup/stretch/mobility)
 - PK: id (uuid, gen_random_uuid())
-- Columns: id, name, description (nullable), difficulty (CHECK: beginner/intermediate/advanced), created_at (timestamptz), type (text NOT NULL DEFAULT 'reps', CHECK: reps/timed)
+- Columns: id, name, description (nullable), difficulty (smallint CHECK 1-10), created_at (timestamptz), type (text NOT NULL DEFAULT 'reps', CHECK: reps/timed), category (text NOT NULL DEFAULT 'strength', CHECK: strength/warmup/dynamic_stretch/static_stretch/mobility), phase (text NOT NULL DEFAULT 'pre', CHECK: pre/post/both)
+- Indexes: idx_exercises_category ON (category), idx_exercises_phase ON (phase), idx_exercises_category_phase ON (category, phase)
 - FK referenced by: workout_plan_exercises.exercise_id
 - RLS policies: public SELECT (true), public INSERT (true), public UPDATE (true), public DELETE (true)
   - Migration `allow_anon_insert_update_exercises` added SELECT/INSERT/UPDATE
   - Migration `allow_anon_delete_exercises` added missing DELETE policy (bug fix: RLS was silently swallowing deletes, returning 204 with no row removed)
+- Category distribution (as of 2026-06-11): strength=143, mobility=13, dynamic_stretch=10, static_stretch=9, warmup=6
 
 ### workout_plans
 - RLS: enabled (permissive — all operations USING/WITH CHECK true)
@@ -32,8 +34,9 @@ https://wshezrsjjeippmvucsjm.supabase.co
 - RLS: enabled (permissive — all operations USING/WITH CHECK true)
 - Rows: 0
 - PK: id (uuid, gen_random_uuid())
-- Columns: id, workout_plan_id (uuid NOT NULL FK -> workout_plans.id CASCADE DELETE), exercise_id (uuid NOT NULL FK -> exercises.id CASCADE DELETE), order_index (integer NOT NULL), quantity (integer NOT NULL), created_at (timestamptz)
+- Columns: id, workout_plan_id (uuid NOT NULL FK -> workout_plans.id CASCADE DELETE), exercise_id (uuid NOT NULL FK -> exercises.id CASCADE DELETE), order_index (integer NOT NULL), quantity (integer NOT NULL), created_at (timestamptz), sets (integer NOT NULL DEFAULT 3, CHECK sets >= 1), set_reps (integer[] NULLABLE — per-set reps override; NULL = uniform, every set uses quantity), rest_seconds (integer NOT NULL DEFAULT 60, CHECK rest_seconds >= 0)
 - Indexes: idx_wpe_plan ON (workout_plan_id, order_index)
+- Sets note: quantity is the per-set base value (reps or seconds). reps for set i = set_reps[i] ?? quantity. sets defaults to 3.
 - Policies: Public SELECT, Anyone INSERT/UPDATE/DELETE (all true)
 
 ### workouts
@@ -54,6 +57,8 @@ https://wshezrsjjeippmvucsjm.supabase.co
 6. 20260531194647 — rls_workout_plan_exercises
 7. (2026-05-31) allow_anon_delete_exercises — added DELETE policy to exercises (was missing, causing silent RLS block)
 8. (2026-06-01) create_workouts_table — created workouts table with permissive RLS, FK to workout_plans (ON DELETE SET NULL), indexes on user_id and workout_plan_id
+9. (2026-06-11) add_sets_to_workout_plan_exercises — added sets (NOT NULL DEFAULT 3), set_reps (integer[] NULL), rest_seconds (NOT NULL DEFAULT 60) with CHECK constraints; existing rows backfilled to 3 sets via default
+10. (2026-06-11) add_category_phase_to_exercises — added category (DEFAULT 'strength') and phase (DEFAULT 'pre') columns with CHECK constraints; 15 existing rows backfilled to correct non-strength categories; 23 new warmup/stretch/mobility exercises inserted
 
 ## Auth / RLS pattern note
 App currently operates without user authentication in practice. All new tables use permissive `USING (true)` / `WITH CHECK (true)` policies across all operations to match this. RLS is still ENABLED on all tables so policies can be tightened later when auth is wired in (scope via auth.uid()).

@@ -23,14 +23,6 @@ export function useDigitalCoachExercises(): UseDigitalCoachExercisesReturn {
   });
 
   const error = appExercises.error ?? service.error ?? null;
-  if (error) {
-    console.error('Error loading Digital Coach exercises:');
-    console.error(error);
-    console.error('App exercises error:');
-    console.error(appExercises.error);
-    console.error('Service exercises error:');
-    console.error(service.error);
-  }
 
   return {
     matched: matchAppExercises(appExercises.exercises, service.data ?? []),

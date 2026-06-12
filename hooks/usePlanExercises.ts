@@ -6,9 +6,9 @@ import {
   fetchPlanExercises,
   insertPlanExercise,
   reorderPlanExercises,
-  updatePlanExerciseQuantity,
+  updatePlanExerciseConfig,
 } from '../utils/queryFunctions';
-import type { PlanExerciseWithExercise } from '../utils/queryFunctions';
+import type { PlanExerciseConfig, PlanExerciseWithExercise } from '../utils/queryFunctions';
 
 interface ReorderUpdate {
   id: string;
@@ -23,7 +23,7 @@ interface UsePlanExercisesReturn {
   addExercise: (planId: string, exerciseId: string, quantity: number) => Promise<boolean>;
   removeExercise: (id: string) => Promise<boolean>;
   reorderExercises: (updates: ReorderUpdate[]) => Promise<boolean>;
-  updateQuantity: (id: string, quantity: number) => Promise<boolean>;
+  updateConfig: (id: string, config: PlanExerciseConfig) => Promise<boolean>;
 }
 
 export function usePlanExercises(): UsePlanExercisesReturn {
@@ -76,9 +76,9 @@ export function usePlanExercises(): UsePlanExercisesReturn {
     onSuccess: invalidate,
   });
 
-  const quantityMutation = useMutation({
-    mutationFn: ({ id, quantity }: { id: string; quantity: number }) =>
-      updatePlanExerciseQuantity(id, quantity),
+  const configMutation = useMutation({
+    mutationFn: ({ id, config }: { id: string; config: PlanExerciseConfig }) =>
+      updatePlanExerciseConfig(id, config),
     onSuccess: invalidate,
   });
 
@@ -109,9 +109,9 @@ export function usePlanExercises(): UsePlanExercisesReturn {
     }
   };
 
-  const updateQuantity = async (id: string, quantity: number): Promise<boolean> => {
+  const updateConfig = async (id: string, config: PlanExerciseConfig): Promise<boolean> => {
     try {
-      await quantityMutation.mutateAsync({ id, quantity });
+      await configMutation.mutateAsync({ id, config });
       return true;
     } catch {
       return false;
@@ -126,6 +126,6 @@ export function usePlanExercises(): UsePlanExercisesReturn {
     addExercise,
     removeExercise,
     reorderExercises,
-    updateQuantity,
+    updateConfig,
   };
 }
