@@ -1,18 +1,19 @@
-import { Image, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { View } from 'react-native';
 
 interface Props {
   canvasHeight: number;
   screenWidth: number;
 }
 
-// Canvas top = highest levels (space), canvas bottom = level 1 (cave).
-// Images are ordered top-to-bottom so scrolling up reveals progression.
+// Ordered top-to-bottom on canvas: space (canvas top = highest level) → cave (canvas bottom = level 1).
+// Adjacent zones share their boundary color so the full canvas reads as one seamless gradient.
 const ZONES = [
-  require('../../../assets/map/zone5_space.jpg'),    // apex — milky way
-  require('../../../assets/map/zone4_sky.jpg'),       // high levels — sky
-  require('../../../assets/map/zone3_mountain.jpg'),  // mid levels — mountain
-  require('../../../assets/map/zone2_forest.jpg'),    // early levels — forest
-  require('../../../assets/map/zone1_cave.jpg'),      // level 1 — underground
+  { id: 'space',    colors: ['#030212', '#0d1535'] as const },
+  { id: 'sky',      colors: ['#0d1535', '#0d2a4a'] as const },
+  { id: 'mountain', colors: ['#0d2a4a', '#0a1820'] as const },
+  { id: 'forest',   colors: ['#0a1820', '#0d1a08'] as const },
+  { id: 'cave',     colors: ['#0d1a08', '#0a0500'] as const },
 ] as const;
 
 export function MapBackground({ canvasHeight, screenWidth }: Props) {
@@ -22,24 +23,13 @@ export function MapBackground({ canvasHeight, screenWidth }: Props) {
       pointerEvents="none"
       style={{ position: 'absolute', width: screenWidth, height: canvasHeight, top: 0, left: 0 }}
     >
-      {ZONES.map((src, i) => (
-        <Image
-          key={i}
-          source={src}
+      {ZONES.map((zone) => (
+        <LinearGradient
+          key={zone.id}
+          colors={zone.colors}
           style={{ width: screenWidth, height: zoneHeight }}
-          resizeMode="cover"
-          fadeDuration={0}
         />
       ))}
-      {/* Dark overlay keeps nodes, paths, and text readable over photos */}
-      <View
-        style={{
-          position: 'absolute',
-          width: screenWidth,
-          height: canvasHeight,
-          backgroundColor: 'rgba(0,0,0,0.52)',
-        }}
-      />
     </View>
   );
 }
