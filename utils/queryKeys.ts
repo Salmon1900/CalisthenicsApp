@@ -1,6 +1,8 @@
 export const queryKeys = {
   exercises: {
     all: () => ['exercises'] as const,
+    byNames: (names: readonly string[]) =>
+      ['exercises', 'byNames', [...names].sort().join('|')] as const,
   },
   plans: {
     all: () => ['plans'] as const,

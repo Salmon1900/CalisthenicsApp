@@ -6,6 +6,7 @@ import { theme } from '../constants/theme';
 import type { RootStackParamList } from '../types/navigation';
 import { formatElapsed } from '../utils/formatTime';
 import { usePlanExercises } from '../hooks/usePlanExercises';
+import { useSessionExercises } from '../hooks/useSessionExercises';
 import { useWorkoutTimer } from '../hooks/useWorkoutTimer';
 import { useWorkoutSession } from '../hooks/useWorkoutSession';
 import { useRestTimer } from '../hooks/useRestTimer';
@@ -18,12 +19,20 @@ import { RestTimerBanner } from '../components/features/workout/RestTimerBanner'
 type Props = NativeStackScreenProps<RootStackParamList, 'Workout'>;
 
 export default function WorkoutScreen({ route, navigation }: Props) {
-  const { plan } = route.params;
+  const { plan, includeWarmup = true, includeCooldown = true } = route.params;
   const insets = useSafeAreaInsets();
 
-  const { planExercises, loading, error, refetch } = usePlanExercises();
+  const { planExercises, loading: planLoading, error, refetch } = usePlanExercises();
+  const sessionExercises = useSessionExercises(planExercises, {
+    warmup: includeWarmup,
+    cooldown: includeCooldown,
+  });
+  const loading = planLoading || sessionExercises.loading;
   const { elapsedSeconds, isRunning, pause, resume } = useWorkoutTimer();
-  const session = useWorkoutSession(planExercises);
+  const session = useWorkoutSession(sessionExercises.items);
+  const currentSection = session.current
+    ? sessionExercises.sectionById[session.current.id]
+    : undefined;
   const restTimer = useRestTimer();
   const { saveWorkout, saving } = useSaveWorkout();
   const userId = useDeviceUserId();
@@ -121,6 +130,7 @@ export default function WorkoutScreen({ route, navigation }: Props) {
           <WorkoutExerciseCard
             item={session.current}
             status={session.currentStatus}
+            section={currentSection}
             currentSetIndex={session.currentSetIndex}
             totalSets={session.currentTotalSets}
             completedSets={session.completedSets}

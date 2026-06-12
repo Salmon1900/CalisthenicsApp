@@ -3,16 +3,25 @@ import { theme } from '../../../constants/theme';
 import type { PlanExerciseWithExercise } from '../../../utils/queryFunctions';
 import type { ExerciseStatus } from '../../../hooks/useWorkoutSession';
 import { getDifficultyColor, getDifficultyLabel } from '../../../utils/difficulty';
+import { sectionLabel } from '../../../utils/warmup';
+import type { WorkoutSection } from '../../../utils/warmup';
 import { SetStepper } from './SetStepper';
 
 interface Props {
   item: PlanExerciseWithExercise;
   status: ExerciseStatus;
+  section?: WorkoutSection;
   currentSetIndex: number;
   totalSets: number;
   completedSets: number;
   currentReps: number;
 }
+
+const SECTION_COLOR: Record<WorkoutSection, string> = {
+  warmup: theme.colors.accent,
+  main: theme.colors.primary,
+  cooldown: theme.colors.success,
+};
 
 // Scale the exercise name down for longer titles so it stays on two lines
 // without pushing the surrounding controls out of place.
@@ -27,6 +36,7 @@ function getNameFontSize(name: string): number {
 export function WorkoutExerciseCard({
   item,
   status,
+  section,
   currentSetIndex,
   totalSets,
   completedSets,
@@ -34,6 +44,7 @@ export function WorkoutExerciseCard({
 }: Props) {
   const { exercise } = item;
   const difficultyColor = getDifficultyColor(exercise.difficulty);
+  const sectionColor = section ? SECTION_COLOR[section] : undefined;
   const nameFontSize = getNameFontSize(exercise.name);
   const allDone = completedSets >= totalSets;
   const quantityLabel = exercise.type === 'reps' ? `${currentReps} reps` : `${currentReps} sec`;
@@ -43,6 +54,12 @@ export function WorkoutExerciseCard({
 
   return (
     <View style={styles.card}>
+      {section && sectionColor ? (
+        <View style={[styles.sectionPill, { backgroundColor: sectionColor }]}>
+          <Text style={styles.sectionPillText}>{sectionLabel(section).toUpperCase()}</Text>
+        </View>
+      ) : null}
+
       <View style={[styles.badge, { borderColor: difficultyColor }]}>
         <Text style={[styles.badgeText, { color: difficultyColor }]}>
           {getDifficultyLabel(exercise.difficulty).toUpperCase()}
@@ -83,6 +100,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.06)',
     gap: 10,
+  },
+  sectionPill: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  sectionPillText: {
+    color: theme.colors.background,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
   badge: {
     borderRadius: 8,

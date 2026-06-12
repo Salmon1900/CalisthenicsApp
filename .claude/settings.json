@@ -15,7 +15,9 @@
       "Bash(npx tsc *)",
       "Bash(node)",
       "mcp__supabase__get_advisors",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit *)"
     ]
   },
   "enabledPlugins": {

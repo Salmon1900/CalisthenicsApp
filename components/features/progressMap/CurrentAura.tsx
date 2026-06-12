@@ -28,9 +28,9 @@ export function CurrentAura({ x, y }: { x: number; y: number }) {
   }, []);
 
   const outerScale = outer.interpolate({ inputRange: [0, 1], outputRange: [1, 1.4] });
-  const outerOpacity = outer.interpolate({ inputRange: [0, 1], outputRange: [0.55, 0.08] });
+  const outerOpacity = outer.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0.9] });
   const innerScale = inner.interpolate({ inputRange: [0, 1], outputRange: [1, 1.25] });
-  const innerOpacity = inner.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0.1] });
+  const innerOpacity = inner.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] });
 
   return (
     <>

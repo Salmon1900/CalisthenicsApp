@@ -23,6 +23,16 @@ export async function fetchExercises(): Promise<Exercise[]> {
   return (data ?? []) as Exercise[];
 }
 
+export async function fetchExercisesByNames(names: readonly string[]): Promise<Exercise[]> {
+  if (names.length === 0) return [];
+  const { data, error } = await supabase
+    .from('exercises')
+    .select('*')
+    .in('name', names as string[]);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as Exercise[];
+}
+
 export async function insertExercise(exercise: NewExercise): Promise<void> {
   const { error } = await supabase.from('exercises').insert(exercise);
   if (error) throw new Error(error.message);

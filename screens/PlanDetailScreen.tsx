@@ -11,6 +11,7 @@ import { CreatePlanModal } from '../components/features/plans/CreatePlanModal';
 import { ExercisePickerModal } from '../components/features/plans/ExercisePickerModal';
 import { PlanExerciseEditorModal } from '../components/features/plans/PlanExerciseEditorModal';
 import { PlanExerciseRow } from '../components/features/plans/PlanExerciseRow';
+import { SessionOptionsToggles } from '../components/features/plans/SessionOptionsToggles';
 import type { PlanExerciseConfig } from '../utils/queryFunctions';
 
 type PlanExerciseWithExercise = WorkoutPlanExercise & { exercise: Exercise };
@@ -22,6 +23,8 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
   const [showEdit, setShowEdit] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [editingExercise, setEditingExercise] = useState<PlanExerciseWithExercise | null>(null);
+  const [includeWarmup, setIncludeWarmup] = useState(true);
+  const [includeCooldown, setIncludeCooldown] = useState(true);
   const insets = useSafeAreaInsets();
 
   const { planExercises, loading, error, refetch, addExercise, removeExercise, reorderExercises, updateConfig } =
@@ -158,12 +161,22 @@ export default function PlanDetailScreen({ route, navigation }: Props) {
             <Text style={styles.lockedText}>Complete all previous levels to unlock this workout</Text>
           </View>
         ) : (
-          <Pressable
-            style={styles.startButton}
-            onPress={() => navigation.navigate('Workout', { plan })}
-          >
-            <Text style={styles.startButtonText}>▶ Start Workout</Text>
-          </Pressable>
+          <>
+            <SessionOptionsToggles
+              warmup={includeWarmup}
+              cooldown={includeCooldown}
+              onChangeWarmup={setIncludeWarmup}
+              onChangeCooldown={setIncludeCooldown}
+            />
+            <Pressable
+              style={styles.startButton}
+              onPress={() =>
+                navigation.navigate('Workout', { plan, includeWarmup, includeCooldown })
+              }
+            >
+              <Text style={styles.startButtonText}>▶ Start Workout</Text>
+            </Pressable>
+          </>
         )
       ) : null}
 
