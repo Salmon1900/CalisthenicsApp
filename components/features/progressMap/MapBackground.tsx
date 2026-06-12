@@ -1,3 +1,4 @@
+import React from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { View } from 'react-native';
 
@@ -16,7 +17,7 @@ const ZONES = [
   { id: 'cave',     colors: ['#0d1a08', '#0a0500'] as const },
 ] as const;
 
-export function MapBackground({ canvasHeight, screenWidth }: Props) {
+export const MapBackground = React.memo(function MapBackground({ canvasHeight, screenWidth }: Props) {
   const zoneHeight = canvasHeight / ZONES.length;
   return (
     <View
@@ -32,4 +33,4 @@ export function MapBackground({ canvasHeight, screenWidth }: Props) {
       ))}
     </View>
   );
-}
+});

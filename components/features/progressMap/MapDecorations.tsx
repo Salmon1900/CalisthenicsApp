@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import { ZoneAmbient } from './ZoneAmbient';
 import type { ZoneId } from './ZoneAmbient';
@@ -16,13 +16,15 @@ function TwinkleStar({ x, y, radius, duration, delay }: {
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const opacity = anim.interpolate({ inputRange: [0, 1], outputRange: [0.06, 0.55] });
   return (
@@ -57,7 +59,7 @@ function StarField({ canvasHeight, screenWidth }: { canvasHeight: number; screen
   );
 }
 
-export function MapDecorations({ canvasHeight, screenWidth }: Props) {
+export const MapDecorations = React.memo(function MapDecorations({ canvasHeight, screenWidth }: Props) {
   const zoneHeight = canvasHeight / ZONES.length;
   return (
     <>
@@ -73,4 +75,4 @@ export function MapDecorations({ canvasHeight, screenWidth }: Props) {
       ))}
     </>
   );
-}
+});

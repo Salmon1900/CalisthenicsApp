@@ -18,13 +18,15 @@ function PulsingOrb({ x, y, radius, color, minOpacity, maxOpacity, duration, del
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const opacity = anim.interpolate({ inputRange: [0, 1], outputRange: [minOpacity, maxOpacity] });
   return (
@@ -42,13 +44,15 @@ function FloatingOrb({ x, y, radius, color, opacity, floatRange, duration, delay
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, -floatRange] });
   return (
@@ -66,13 +70,15 @@ function RotatedShard({ x, y, width, height, color, rotation, minOpacity, maxOpa
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const opacity = anim.interpolate({ inputRange: [0, 1], outputRange: [minOpacity, maxOpacity] });
   return (
@@ -89,13 +95,15 @@ function DriftingDot({ x, y, radius, color, minOpacity, maxOpacity, driftY, dura
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const opacity = anim.interpolate({ inputRange: [0, 1], outputRange: [minOpacity, maxOpacity] });
   const translateY = anim.interpolate({ inputRange: [0, 1], outputRange: [0, driftY] });
@@ -114,13 +122,15 @@ function DriftingLine({ x, y, width, height, color, minOpacity, maxOpacity, drif
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const opacity = anim.interpolate({ inputRange: [0, 1], outputRange: [minOpacity, maxOpacity] });
   const translateX = anim.interpolate({ inputRange: [0, 1], outputRange: [0, driftX] });
@@ -139,13 +149,15 @@ function OrbitalRing({ x, y, radius, color, opacity, duration, delay }: {
 }) {
   const anim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let loop: Animated.CompositeAnimation;
     const t = setTimeout(() => {
-      Animated.loop(Animated.sequence([
+      loop = Animated.loop(Animated.sequence([
         Animated.timing(anim, { toValue: 1, duration: duration / 2, useNativeDriver: true }),
         Animated.timing(anim, { toValue: 0, duration: duration / 2, useNativeDriver: true }),
-      ])).start();
+      ]));
+      loop.start();
     }, delay);
-    return () => clearTimeout(t);
+    return () => { clearTimeout(t); loop?.stop(); };
   }, []);
   const rotate = anim.interpolate({ inputRange: [0, 1], outputRange: ['-5deg', '5deg'] });
   return (
